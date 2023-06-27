@@ -4,129 +4,151 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class CurrentTile : MonoBehaviour
+public class CurrentTile : Cell
 {
-    TileSet tileNeighbors = new TileSet();
+    Tile tile = new Tile();
+    public NeighborTiles tileSet = new NeighborTiles();
+    public List<Socket> sockets = new List<Socket>();
 
-    [SerializeField] Sprite[] backgrounds;
-
-    public float size;
-    public List<Tile> northTileNeighbors = new List<Tile>();
     public CurrentTile northNeighbor;
 
-    public List<Tile> eastTileNeighbors = new List<Tile>();
     public CurrentTile eastNeighbor;
 
-    public List<Tile> southTileNeighbors = new List<Tile>();
     public CurrentTile southNeighbor;
 
-    public List<Tile> westTileNeighbors = new List<Tile>();
     public CurrentTile westNeighbor;
-    public bool collapsed;
+    
+    [SerializeField] List<Sprite> backgrounds;
+    public float size;
 
-    void Awake()
+    private void OnEnable() 
     {
-        northTileNeighbors = tileNeighbors.Tiles;
-        eastTileNeighbors = tileNeighbors.Tiles;
-        southTileNeighbors = tileNeighbors.Tiles;
-        westTileNeighbors = tileNeighbors.Tiles;
+        tileCollapseEvent += RunMethods;
+    }
+    private void OnDisable() 
+    {
+        tileCollapseEvent -= RunMethods;
     }
     void Start()
     {
         NeighborChecks();
-        // NeighborTileChanger();
+
+        if (index == 1)
+        {
+            RunMethods();
+        }
+    }
+
+    private void RunMethods()
+    {
+        RemoveNeighborsFromLists();
         RollForTile();
     }
+
     void NeighborChecks()
     {
-        List<Transform> transforms = new List<Transform>();
+        List<CurrentTile> grid = GridManager.grid;
 
-        RaycastHit2D raycastHitNorth = Physics2D.Raycast((Vector2)transform.position + Vector2.up, Vector2.up, .5f);
-        if (raycastHitNorth.collider != null)
+        bool GetNorthEdgeCheck()
         {
-            northNeighbor = raycastHitNorth.collider.gameObject.GetComponent<CurrentTile>();
+            return Mathf.Ceil(index / GridManager.columnNumber) == GridManager.columnNumber - 1 || index == GridManager.columnNumber * GridManager.rowNumber;
+        }
+        bool GetEastColumnCheck()
+        {
+            return index % GridManager.columnNumber == 0;
+        }
+        bool GetSouthEdgeCheck()
+        {
+            return Mathf.Ceil(index / GridManager.columnNumber) == 0 || index == GridManager.columnNumber;
+        }        
+        bool GetWestColumnEdgeCheck()
+        {
+            return index % GridManager.columnNumber == 1;
         }
 
-        RaycastHit2D raycastHitEast = Physics2D.Raycast((Vector2)transform.position + Vector2.right, Vector2.right, .5f);
-        if (raycastHitEast.collider != null)
-        {
-            eastNeighbor = raycastHitEast.collider.gameObject.GetComponent<CurrentTile>(); 
-        }
 
-        RaycastHit2D raycastHitSouth = Physics2D.Raycast((Vector2)transform.position + Vector2.down, Vector2.down, .5f);
-        if (raycastHitSouth.collider != null)
+        if (!GetNorthEdgeCheck())
         {
-            southNeighbor = raycastHitSouth.collider.gameObject.GetComponent<CurrentTile>();            
+            northNeighbor = grid[(index - 1) + GridManager.columnNumber];
         }
-
-        RaycastHit2D raycastHitWest = Physics2D.Raycast((Vector2)transform.position + Vector2.left, Vector2.left, .5f);        
-        if (raycastHitWest.collider != null)
+        if (!GetEastColumnCheck())
         {
-            westNeighbor = raycastHitWest.collider.gameObject.GetComponent<CurrentTile>();            
+            eastNeighbor = grid[(index - 1) + 1];
         }
-    }
-    void NeighborTileChanger()
-    {
-
+        if (!GetSouthEdgeCheck())
+        {
+            southNeighbor = grid[(index - 1) - GridManager.columnNumber];
+        }
+        if (!GetWestColumnEdgeCheck())
+        {
+            westNeighbor = grid[(index - 1)-1];
+        }        
     }
     void RollForTile()
     {
-        int random = UnityEngine.Random.Range(0, 16);
+        int random = UnityEngine.Random.Range(0, tileSet.Tiles.Count);
 
-        if (northNeighbor != null && !northNeighbor.collapsed)
+        if (random < tileSet.Tiles.Count)
         {
-            int randomMax = northNeighbor.southTileNeighbors.Count+1;
-            random = UnityEngine.Random.Range(0, randomMax);
+            SetCurrentTile(random);
 
-            if (random < randomMax - 1)
-            {
-                GetComponent<SpriteRenderer>().sprite = backgrounds[random];
-                collapsed = true;
+            if (northNeighbor != null) northNeighbor.OnCollapsed();
+            if (eastNeighbor != null) eastNeighbor.OnCollapsed();
+            if (southNeighbor != null) southNeighbor.OnCollapsed();
+            if (westNeighbor != null) westNeighbor.OnCollapsed();
 
-                return;
-            }
+            return;
         }
-        if (eastNeighbor != null && !eastNeighbor.collapsed)
-        {
-            int randomMax = eastNeighbor.westTileNeighbors.Count+1;
-            random = UnityEngine.Random.Range(0, randomMax);
-
-            if (random < randomMax - 1)
-            {
-                GetComponent<SpriteRenderer>().sprite = backgrounds[random];
-                collapsed = true;
-
-                return;
-            }
-        }
-        if (southNeighbor != null && !southNeighbor.collapsed)
-        {
-            int randomMax = southNeighbor.northTileNeighbors.Count+1;
-            random = UnityEngine.Random.Range(0, randomMax);
-
-            if (random < randomMax - 1)
-            {
-                GetComponent<SpriteRenderer>().sprite = backgrounds[random];
-                collapsed = true;
-
-                return;
-            }
-        }
-        if (westNeighbor != null && !westNeighbor.collapsed)
-        {
-            int randomMax = westNeighbor.eastTileNeighbors.Count+1;
-            random = UnityEngine.Random.Range(0, randomMax);
-
-            if (random < randomMax - 1)
-            {
-                GetComponent<SpriteRenderer>().sprite = backgrounds[random];
-                collapsed = true;
-
-                return;
-            }
-        }
+        
         Debug.Log("failed");
         RollForTile();
+        
+    }
+    private void SetCurrentTile(int random)
+    {
+        tile = tileSet.Tiles[random];
+
+        sockets.Capacity = 4;
+        sockets.AddRange(new List<Socket>() { tile.NORTH, tile.EAST, tile.SOUTH, tile.WEST });
+
+        GetComponent<SpriteRenderer>().sprite = backgrounds[random];
+        
+        collapsed = true;
+    }
+    private void RemoveNeighborsFromLists()
+    {
+        for (int i = 0; i < northNeighbor.tileSet.Tiles.Count - 1; i++)
+        {
+            if (northNeighbor.tileSet.Tiles[i].SOUTH != tile.NORTH)
+            {
+                northNeighbor.tileSet.Tiles.Remove(northNeighbor.tileSet.Tiles[i]);
+                northNeighbor.backgrounds.RemoveAt(i);
+            }
+        }
+        for (int i = 0; i < eastNeighbor.tileSet.Tiles.Count - 1; i++)
+        {
+            if (eastNeighbor.tileSet.Tiles[i].WEST != tile.EAST)
+            {
+                eastNeighbor.tileSet.Tiles.Remove(eastNeighbor.tileSet.Tiles[i]);
+                eastNeighbor.backgrounds.RemoveAt(i);
+            }
+        }
+        for (int i = 0; i < southNeighbor.tileSet.Tiles.Count - 1; i++)
+        {
+            if (southNeighbor.tileSet.Tiles[i].WEST != tile.EAST)
+            {
+                southNeighbor.tileSet.Tiles.Remove(southNeighbor.tileSet.Tiles[i]);
+                southNeighbor.backgrounds.RemoveAt(i);
+            }
+        }
+        for (int i = 0; i < westNeighbor.tileSet.Tiles.Count - 1; i++)
+        {
+            if (westNeighbor.tileSet.Tiles[i].WEST != tile.EAST)
+            {
+                westNeighbor.tileSet.Tiles.Remove(westNeighbor.tileSet.Tiles[i]);
+                westNeighbor.backgrounds.RemoveAt(i);
+            }
+        }
     }
 
 }

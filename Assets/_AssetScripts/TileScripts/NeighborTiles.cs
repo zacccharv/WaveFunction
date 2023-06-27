@@ -1,11 +1,12 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TileSet
+public class NeighborTiles
 {
     private int rotation;
-    public List<Tile> Tiles { get; private set; }
-    public TileSet()
+    public List<Tile> Tiles { get; set; }
+    public NeighborTiles()
     {
         Tiles = new List<Tile>(16);
 

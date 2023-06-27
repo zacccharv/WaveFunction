@@ -4,18 +4,12 @@ using UnityEngine;
 
 public class CreateGrid : MonoBehaviour
 {
+    public static event System.Action gridLoaded;
     public int columnNumber = 10, rowNumber = 10;
-    public float width = 1, height = 1;
-    [SerializeField] List<GameObject> grid = new List<GameObject>();
+    public float tileWidth = 1, tileHeight = 1;
+    public List<GameObject> grid = new List<GameObject>();
     public GameObject gridItem;
-    private float offset = 5;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        offset = offset - (width/2);
-        DrawGrid();
-    }
+    public float offset = 5;
     public void DrawGrid()
     {
         foreach (var item in grid)
@@ -33,12 +27,12 @@ public class CreateGrid : MonoBehaviour
     }
     void DrawSquare(int rowNumber, int columnNumber)
     {
-        float columnPos = columnNumber * width - offset;
-        float rowPos = rowNumber * height - offset;
+        float columnPos = columnNumber * tileWidth - offset;
+        float rowPos = rowNumber * tileHeight - offset;
 
         GameObject obj = Instantiate(gridItem, new Vector2(columnPos, rowPos), Quaternion.identity, transform);
 
-        obj.transform.localScale = new Vector3(width, height);
+        obj.transform.localScale = new Vector3(tileWidth, tileHeight);
 
         grid.Add(obj);
     }

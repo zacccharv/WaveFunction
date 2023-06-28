@@ -7,9 +7,10 @@ using UnityEngine;
 public class CurrentTile : Cell
 {
     public bool startTile;
-    Tile tile = new Tile();
+    public Tile tile = new Tile();
     public TileSet tileSet = new TileSet();
     public List<Socket> sockets = new List<Socket>();
+    public Sprite initSprite;
 
     public CurrentTile northNeighbor;
 
@@ -18,10 +19,10 @@ public class CurrentTile : Cell
     public CurrentTile southNeighbor;
 
     public CurrentTile westNeighbor;
+
     
     public List<Sprite> backgrounds = new List<Sprite>();
-    private SpriteRenderer spriteRenderer;
-
+    public SpriteRenderer spriteRenderer;
 
     private void OnEnable() 
     {
@@ -37,9 +38,6 @@ public class CurrentTile : Cell
         spriteRenderer = GetComponent<SpriteRenderer>();
         NeighborChecks();
 
-        Debug.Log(backgrounds.Count);
-        Debug.Log(tileSet.Tiles.Count);
-
         if (startTile)
         {
             StartCoroutine(RunMethods());
@@ -54,11 +52,15 @@ public class CurrentTile : Cell
     public IEnumerator RunMethods()
     {
         if (!collapsed)
-        {               
-            RollForTile();
+        {         
+            RollCommand roll = new RollCommand(this, CommandManager);
+
+            roll.Execute();
             yield return null;     
 
-            RemoveNeighborsFromLists();
+            EleminateCommand eleminate = new EleminateCommand(this, CommandManager);
+
+            eleminate.Execute();
             yield return null;
 
             if (northNeighbor != null && !northNeighbor.collapsed)
@@ -83,7 +85,6 @@ public class CurrentTile : Cell
         collapsed = true;
         yield return null;
     }
-
     void NeighborChecks()
     {
         List<CurrentTile> grid = GridManager.grid;
@@ -122,18 +123,19 @@ public class CurrentTile : Cell
             westNeighbor = grid[(index - 1)-1];
         }        
     }
-    void RollForTile()
+    public void RollForTile()
     {
-        int random = UnityEngine.Random.Range(0, tileSet.Tiles.Count);
+        System.Random random = new System.Random();
 
-        SetCurrentTile(random);
+        SetCurrentTile(random.Next(0, backgrounds.Count));
         return;
     }
-    private void SetCurrentTile(int random)
+    public void SetCurrentTile(int random)
     {
         if (backgrounds.Count-1 < random)
         {
             StopAllCoroutines();
+
             return;
         }
 
@@ -142,7 +144,7 @@ public class CurrentTile : Cell
 
         sockets = new List<Socket>() { tile.NORTH, tile.EAST, tile.SOUTH, tile.WEST };
     }
-    private void RemoveNeighborsFromLists()
+    public void RemoveNeighborsFromLists()
     {
         if (northNeighbor != null) 
         {

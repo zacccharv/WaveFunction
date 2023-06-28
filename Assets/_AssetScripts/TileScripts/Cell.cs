@@ -8,9 +8,8 @@ public class Cell : MonoBehaviour
 
     public int index = 1;
 
-    public GridManager GridManager { get { return transform.parent.gameObject.GetComponent<GridManager>(); } }
-    
-    public JobManager JobManager { get { return FindAnyObjectByType<JobManager>(); } }
+    public GridManager GridManager { get { return FindAnyObjectByType<GridManager>(); } }
+    public CommandManager CommandManager { get { return FindAnyObjectByType<CommandManager>(); } }
 
     public void OnCollapsed()
     {

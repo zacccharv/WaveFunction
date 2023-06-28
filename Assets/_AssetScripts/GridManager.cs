@@ -23,6 +23,7 @@ public class GridManager : MonoBehaviour
     }
     void DrawSquare(int rowNumber, int columnNumber)
     {
+        
         float columnPos = columnNumber * tileWidth - offset;
         float rowPos = rowNumber * tileHeight - offset;
 
@@ -32,6 +33,11 @@ public class GridManager : MonoBehaviour
         currentIndex++;
 
         obj.GetComponent<Cell>().index = currentIndex;
+
+        if (currentIndex == 1)
+        {
+            obj.GetComponent<CurrentTile>().startTile = true;
+        }
 
         grid.Add(obj.GetComponent<CurrentTile>());
     }

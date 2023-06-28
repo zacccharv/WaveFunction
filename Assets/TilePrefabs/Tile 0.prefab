@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 9002143205937566584}
   - component: {fileID: 3002229342194127}
   - component: {fileID: 9035322680775764621}
-  - component: {fileID: 7581347393157692934}
   m_Layer: 0
   m_Name: Tile 0
   m_TagString: Untagged
@@ -98,6 +97,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb55965e151a17e48836ad31a73b9d1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collapsed: 0
+  index: 1
+  startTile: 0
+  sockets: 
+  initSprite: {fileID: 21300000, guid: 38b0b491d032e3f48803a2e461bc0eca, type: 3}
+  northNeighbor: {fileID: 0}
+  eastNeighbor: {fileID: 0}
+  southNeighbor: {fileID: 0}
+  westNeighbor: {fileID: 0}
   backgrounds:
   - {fileID: 21300000, guid: 38b0b491d032e3f48803a2e461bc0eca, type: 3}
   - {fileID: 21300000, guid: 2a8b99314be2ac44dbfbca01572c5ae3, type: 3}
@@ -115,35 +123,4 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c074398e62a6a124687eeaebf2d29507, type: 3}
   - {fileID: 21300000, guid: 48db62bf2c1d06145800b90375ee04c2, type: 3}
   - {fileID: 21300000, guid: 3acfc39fb2ea6454e90b13fd54b6c1fc, type: 3}
-  size: 0
-  northNeighbor: {fileID: 0}
-  eastNeighbor: {fileID: 0}
-  southNeighbor: {fileID: 0}
-  westNeighbor: {fileID: 0}
-  collapsed: 0
---- !u!61 &7581347393157692934
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6712415181842412849}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.984375, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  spriteRenderer: {fileID: 3002229342194127}

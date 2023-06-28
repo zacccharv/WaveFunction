@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Jobs;
 using UnityEngine;
 
 public class CurrentTile : Cell
@@ -20,8 +19,7 @@ public class CurrentTile : Cell
 
     public CurrentTile westNeighbor;
     
-    [SerializeField] List<Sprite> backgrounds;
-    public float size;
+    public List<Sprite> backgrounds = new List<Sprite>();
     private SpriteRenderer spriteRenderer;
 
 
@@ -36,15 +34,15 @@ public class CurrentTile : Cell
 
     private void Awake() 
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
         NeighborChecks();
+
+        Debug.Log(backgrounds.Count);
+        Debug.Log(tileSet.Tiles.Count);
+
         if (startTile)
         {
-            for (var i = 0; i < tileSet.Tiles.Count - 1; i++)
-            {
-                Debug.Log($"{tileSet.Tiles[i].ToString()}, index = {i}");
-            }
-
-            RunCoroutine();
+            StartCoroutine(RunMethods());
         }
     }
 
@@ -56,12 +54,12 @@ public class CurrentTile : Cell
     public IEnumerator RunMethods()
     {
         if (!collapsed)
-        {        
-            RemoveNeighborsFromLists();
-            yield return new WaitForEndOfFrame();
-
+        {               
             RollForTile();
-            yield return new WaitForEndOfFrame();
+            yield return null;     
+
+            RemoveNeighborsFromLists();
+            yield return null;
 
             if (northNeighbor != null && !northNeighbor.collapsed)
             {
@@ -78,8 +76,8 @@ public class CurrentTile : Cell
             else if (westNeighbor != null && !westNeighbor.collapsed)
             {
                 westNeighbor.OnCollapsed();
-            }                    
-            yield return new WaitForEndOfFrame();
+            }
+            yield return null;
         }
 
         collapsed = true;
@@ -128,72 +126,92 @@ public class CurrentTile : Cell
     {
         int random = UnityEngine.Random.Range(0, tileSet.Tiles.Count);
 
-        if (random < tileSet.Tiles.Count)
-        {
-            SetCurrentTile(random);
-
-            return;
-        }
-        
-        Debug.Log("failed");
-        RollForTile();
+        SetCurrentTile(random);
+        return;
     }
     private void SetCurrentTile(int random)
     {
+        if (backgrounds.Count-1 < random)
+        {
+            StopAllCoroutines();
+            return;
+        }
+
+        spriteRenderer.sprite = backgrounds[random];
         tile = tileSet.Tiles[random];
 
         sockets = new List<Socket>() { tile.NORTH, tile.EAST, tile.SOUTH, tile.WEST };
-
-        GetComponent<SpriteRenderer>().sprite = backgrounds[random];
     }
     private void RemoveNeighborsFromLists()
     {
         if (northNeighbor != null) 
         {
+            List<Tile> neighbors = new List<Tile>();
+            List<Sprite> sprites = new List<Sprite>();
+
             for (int i = 0; i < northNeighbor.tileSet.Tiles.Count - 1; i++)
-            {
-                if (northNeighbor.tileSet.Tiles[i].SOUTH != tile.NORTH)
+            {   
+
+                if (tile.NORTH == northNeighbor.tileSet.Tiles[i].SOUTH)
                 {
-                    northNeighbor.tileSet.Tiles.Remove(northNeighbor.tileSet.Tiles[i]);
-                    northNeighbor.backgrounds.RemoveAt(i);
+                    neighbors.Add(northNeighbor.tileSet.Tiles[i]);
+                    sprites.Add(northNeighbor.backgrounds[i]);
                 }
             }
+            northNeighbor.tileSet.Tiles = neighbors;
+            northNeighbor.backgrounds = sprites;
         }
 
         if (eastNeighbor != null)
         {
+            List<Tile> neighbors = new List<Tile>();
+            List<Sprite> sprites = new List<Sprite>(); 
+
             for (int i = 0; i < eastNeighbor.tileSet.Tiles.Count - 1; i++)
             {
-                if (eastNeighbor.tileSet.Tiles[i].WEST != tile.EAST)
+                if (eastNeighbor.tileSet.Tiles[i].WEST == tile.EAST)
                 {
-                    eastNeighbor.tileSet.Tiles.Remove(eastNeighbor.tileSet.Tiles[i]);
-                    eastNeighbor.backgrounds.RemoveAt(i);
+                    neighbors.Add(eastNeighbor.tileSet.Tiles[i]);
+                    sprites.Add(eastNeighbor.backgrounds[i]);
                 }
             }
+            eastNeighbor.tileSet.Tiles = neighbors;
+            eastNeighbor.backgrounds = sprites;
         }
 
         if (southNeighbor != null)
         {
+            List<Tile> neighbors = new List<Tile>(16);
+            List<Sprite> sprites = new List<Sprite>(16);   
+
+
             for (int i = 0; i < southNeighbor.tileSet.Tiles.Count - 1; i++)
             {
-                if (southNeighbor.tileSet.Tiles[i].NORTH != tile.SOUTH)
+                if (southNeighbor.tileSet.Tiles[i].NORTH == tile.SOUTH)
                 {
-                    southNeighbor.tileSet.Tiles.Remove(southNeighbor.tileSet.Tiles[i]);
-                    southNeighbor.backgrounds.RemoveAt(i);
+                    neighbors.Add(southNeighbor.tileSet.Tiles[i]);
+                    sprites.Add(southNeighbor.backgrounds[i]);
                 }
             }
+            southNeighbor.tileSet.Tiles = neighbors;
+            southNeighbor.backgrounds = sprites;
         }
 
         if (westNeighbor != null)
         {
+            List<Tile> neighbors = new List<Tile>();
+            List<Sprite> sprites = new List<Sprite>(); 
+
             for (int i = 0; i < westNeighbor.tileSet.Tiles.Count - 1; i++)
             {
-                if (westNeighbor.tileSet.Tiles[i].EAST != tile.WEST)
+                if (westNeighbor.tileSet.Tiles[i].EAST == tile.WEST)
                 {
-                    westNeighbor.tileSet.Tiles.Remove(westNeighbor.tileSet.Tiles[i]);
-                    westNeighbor.backgrounds.RemoveAt(i);
+                    neighbors.Add(westNeighbor.tileSet.Tiles[i]);
+                    sprites.Add(westNeighbor.backgrounds[i]);
                 }
             }
+            westNeighbor.tileSet.Tiles = neighbors;
+            westNeighbor.backgrounds = sprites;
         }
     }
 }

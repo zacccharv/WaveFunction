@@ -15,27 +15,30 @@ public class TileSet
             Tiles.Add(new Tile());
         }
 
-        for (int i = 0; i < Tiles.Capacity - 1; i++)
+        for (int i = 0; i < Tiles.Capacity; i++)
         {
-            rotation = ((i-1) % 4) * 90;
-
+            rotation = ((i+1) % 4) * 90;
             if (i == 0)
             {
                 Tiles[i] = BaseTiles.Tile0;
             }
-            else if (i >= 1 && i <= 2)
+            else if (i == 1)
             {
-                Tiles[i] = RotateTile(BaseTiles.Tile1, rotation);
+                Tiles[i] = RotateTile(BaseTiles.Tile1, 0);
             }
-            else if (i >= 3 && i <= 6)
+            else if (i == 2)
+            {
+                Tiles[i] = RotateTile(BaseTiles.Tile1, 90);
+            }
+            else if (i > 2 && i < 7)
             {                    
                 Tiles[i] = RotateTile(BaseTiles.Tile2, rotation);
             }
-            else if (i >= 7 && i <= 10)
+            else if (i > 6 && i < 11)
             {
                 Tiles[i] = RotateTile(BaseTiles.Tile3, rotation);
             }
-            else if (i >= 11 && i <= 14)
+            else if (i > 10 && i < 15)
             {
                 Tiles[i] = RotateTile(BaseTiles.Tile4, rotation);
             }
@@ -48,6 +51,7 @@ public class TileSet
     Tile RotateTile(Tile tile, int rotation)
     {
         Tile rotatedList = new Tile();
+        List<Socket> sockets = new List<Socket>(4);
 
         if (rotation == 0)
         {
@@ -55,15 +59,18 @@ public class TileSet
         }
         else if (rotation == 90)
         {
-            rotatedList = new Tile(tile.WEST, tile.NORTH, tile.EAST, tile.SOUTH);
+            sockets = new List<Socket>() { tile.WEST, tile.NORTH, tile.EAST, tile.SOUTH };
+            rotatedList =  new Tile(sockets[0], sockets[1], sockets[2], sockets[3]);
         }
         else if (rotation == 180)
         {
-            rotatedList = new Tile(tile.SOUTH, tile.WEST, tile.NORTH, tile.EAST);
+            sockets = new List<Socket>(){ tile.SOUTH, tile.WEST, tile.NORTH, tile.EAST };            
+            rotatedList =  new Tile(sockets[0], sockets[1], sockets[2], sockets[3]);
         }
         else if (rotation == 270)
-        {
-            rotatedList =  new Tile(tile.EAST, tile.SOUTH, tile.WEST, tile.NORTH);
+        {            
+            sockets = new List<Socket>() { tile.EAST, tile.SOUTH, tile.WEST, tile.NORTH };  
+            rotatedList =  new Tile(sockets[0], sockets[1], sockets[2], sockets[3]);
         }
 
         return rotatedList;

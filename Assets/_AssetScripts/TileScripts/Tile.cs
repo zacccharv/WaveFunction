@@ -5,13 +5,13 @@ public struct Tile
     {
         NORTH = a;
         EAST = b;
-        WEST = c;
-        SOUTH = d;
+        SOUTH = c;
+        WEST = d;
     }
     public Socket NORTH { get; }
     public Socket EAST { get; }
-    public Socket WEST { get; }
     public Socket SOUTH { get; }
+    public Socket WEST { get; }
 
-    public override string ToString() => $"({NORTH}, {EAST}, {WEST}, {SOUTH})";
+    public override string ToString() => $"({NORTH}, {EAST}, {SOUTH}, {WEST})";
 }

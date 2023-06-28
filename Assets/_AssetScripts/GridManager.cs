@@ -6,6 +6,7 @@ public class GridManager : MonoBehaviour
 {
     public static event System.Action gridLoaded;
     public int columnNumber = 10, rowNumber = 10;
+    
     public float tileWidth = 1, tileHeight = 1;
     public List<CurrentTile> grid = new List<CurrentTile>();
     public GameObject gridItem;

@@ -27,7 +27,6 @@ public class CurrentTile : Cell
     private void OnEnable() 
     {
         tileCollapseEvent += RunCoroutine;
-        
     }
     private void OnDisable() 
     {
@@ -52,11 +51,11 @@ public class CurrentTile : Cell
     public IEnumerator RunMethods()
     {
         if (!collapsed)
-        {         
+        {
             RollCommand roll = new RollCommand(this, CommandManager, GridManager);
 
             roll.Execute();
-            yield return null;     
+            yield return null;
 
             EleminateCommand eleminate = new EleminateCommand(this, CommandManager, GridManager);
 
@@ -67,12 +66,33 @@ public class CurrentTile : Cell
             {
                 GridManager.grid[index].OnCollapsed();
             }
+            // Collapse();
 
             yield return null;
         }
 
         collapsed = true;
         yield return null;
+
+        void Collapse()
+        {
+            if (northNeighbor != null && !northNeighbor.collapsed)
+            {
+                northNeighbor.OnCollapsed();
+            }
+            else if (eastNeighbor != null && !eastNeighbor.collapsed)
+            {
+                eastNeighbor.OnCollapsed();
+            }
+            else if (southNeighbor != null && !southNeighbor.collapsed)
+            {
+                southNeighbor.OnCollapsed();
+            }
+            else if (westNeighbor != null && !westNeighbor.collapsed)
+            {
+                westNeighbor.OnCollapsed();
+            }
+        }
     }
     void NeighborChecks()
     {

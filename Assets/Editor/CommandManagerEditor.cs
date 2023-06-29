@@ -10,8 +10,8 @@ public class CommandManagerEditor : Editor
         {  
             CommandManager manager = target as CommandManager;
 
-            manager.UndoLastCommand();
-            manager.UndoLastCommand();
+            manager.UndoLastTileCommand();
+            manager.UndoLastTileCommand();
         }
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 public class CurrentTile : Cell
 {
     public bool startTile;
+    public bool failed;
     public Tile tile = new Tile();
     public TileSet tileSet = new TileSet();
     public List<Socket> sockets = new List<Socket>();
@@ -20,13 +21,13 @@ public class CurrentTile : Cell
 
     public CurrentTile westNeighbor;
 
-    
     public List<Sprite> backgrounds = new List<Sprite>();
     public SpriteRenderer spriteRenderer;
 
     private void OnEnable() 
     {
         tileCollapseEvent += RunCoroutine;
+        
     }
     private void OnDisable() 
     {
@@ -43,7 +44,6 @@ public class CurrentTile : Cell
             StartCoroutine(RunMethods());
         }
     }
-
     private void RunCoroutine()
     {
         StartCoroutine(RunMethods());
@@ -53,32 +53,21 @@ public class CurrentTile : Cell
     {
         if (!collapsed)
         {         
-            RollCommand roll = new RollCommand(this, CommandManager);
+            RollCommand roll = new RollCommand(this, CommandManager, GridManager);
 
             roll.Execute();
             yield return null;     
 
-            EleminateCommand eleminate = new EleminateCommand(this, CommandManager);
+            EleminateCommand eleminate = new EleminateCommand(this, CommandManager, GridManager);
 
             eleminate.Execute();
             yield return null;
 
-            if (northNeighbor != null && !northNeighbor.collapsed)
+            if (!GridManager.grid[index].collapsed)
             {
-                northNeighbor.OnCollapsed();
+                GridManager.grid[index].OnCollapsed();
             }
-            else if (eastNeighbor != null && !eastNeighbor.collapsed)
-            {
-                eastNeighbor.OnCollapsed();
-            }
-            else if (southNeighbor != null && !southNeighbor.collapsed)
-            {
-                southNeighbor.OnCollapsed();
-            }     
-            else if (westNeighbor != null && !westNeighbor.collapsed)
-            {
-                westNeighbor.OnCollapsed();
-            }
+
             yield return null;
         }
 
@@ -123,26 +112,13 @@ public class CurrentTile : Cell
             westNeighbor = grid[(index - 1)-1];
         }        
     }
-    public void RollForTile()
+    public void RollForTile(int random)
     {
-        System.Random random = new System.Random();
-
-        SetCurrentTile(random.Next(0, backgrounds.Count));
-        return;
-    }
-    public void SetCurrentTile(int random)
-    {
-        if (backgrounds.Count-1 < random)
-        {
-            StopAllCoroutines();
-
-            return;
-        }
-
         spriteRenderer.sprite = backgrounds[random];
         tile = tileSet.Tiles[random];
 
         sockets = new List<Socket>() { tile.NORTH, tile.EAST, tile.SOUTH, tile.WEST };
+        return;
     }
     public void RemoveNeighborsFromLists()
     {

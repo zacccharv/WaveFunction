@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class WaveFunctionManager : MonoBehaviour
 {
+    public CommandManager CommandManager { get { return FindAnyObjectByType<CommandManager>(); } }
+
     public GridManager gridManager;
     public List<CurrentTile> currentTiles = new List<CurrentTile>();
     public TileSet tileSet = new TileSet();

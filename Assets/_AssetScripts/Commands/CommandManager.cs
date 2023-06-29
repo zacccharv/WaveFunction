@@ -4,17 +4,29 @@ using UnityEngine;
 
 public class CommandManager : MonoBehaviour
 {
-    public Stack<Command> CommandStack = new Stack<Command>();
-    public void PushCommand(Command command)
+    public Stack<TileCommand> TileCommandStack = new Stack<TileCommand>();
+    public void PushTileCommand(TileCommand tileCommand)
     {
-        CommandStack.Push(command);
+        TileCommandStack.Push(tileCommand);
+    }    
+    public void UndoLastTileCommand()
+    {
+        if (TileCommandStack.Count == 0) return;
+
+        TileCommand lastCommand = TileCommandStack.Pop();
+        lastCommand.Undo();        
     }
-
-    public void UndoLastCommand()
+    
+    public void UndoTileChunk(int chunkCount)
     {
-        if (CommandStack.Count == 0) return;
+        if (TileCommandStack.Count < chunkCount) return;
 
-        Command lastCommand = CommandStack.Pop();
-        lastCommand.Undo();
+        for (var i = 0; i < chunkCount; i++)
+        {
+            TileCommand lastCommand = TileCommandStack.Pop();
+            lastCommand.Undo();      
+            lastCommand = TileCommandStack.Pop();
+            lastCommand.Undo();      
+        }
     }
 }

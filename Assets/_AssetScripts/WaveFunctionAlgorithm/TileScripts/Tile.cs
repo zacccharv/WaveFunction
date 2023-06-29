@@ -1,7 +1,7 @@
 using System.Collections;
 public struct Tile
 {
-    public Tile(Socket a = Socket.empty, Socket b = Socket.empty, Socket c = Socket.empty, Socket d = Socket.empty)
+    public Tile(Socket a, Socket b, Socket c, Socket d)
     {
         NORTH = a;
         EAST = b;

@@ -6,7 +6,7 @@ public class Cell : MonoBehaviour
 
     public bool collapsed;
 
-    public int index = 1;
+    public int index = 0;
 
     public GridManager GridManager { get { return FindAnyObjectByType<GridManager>(); } }
     public CommandManager CommandManager { get { return FindAnyObjectByType<CommandManager>(); } }

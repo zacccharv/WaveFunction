@@ -21,6 +21,7 @@ public class CurrentTile : Cell
     public List<Sprite> backgrounds = new List<Sprite>();
     public SpriteRenderer spriteRenderer;
 
+    int NE = 1; int SE = 2; int SW = 3; int NW = 4;
     private void OnEnable() 
     {
         tileCollapseEvent += RunCoroutine;
@@ -33,7 +34,7 @@ public class CurrentTile : Cell
     private void Awake() 
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        NeighborChecks();
+        GetNeighbors();
 
         if (startTile)
         {
@@ -73,36 +74,76 @@ public class CurrentTile : Cell
 
         void Collapse()
         {
-            // TODO Create list rotater
-            if (northNeighbor != null && !northNeighbor.collapsed 
-            && (WaveFunctionManager.waveDirection == Direction.NONE
-            || WaveFunctionManager.waveDirection == Direction.WEST
-            || WaveFunctionManager.waveDirection == Direction.NORTH))
+            WaveFunctionManager.waveDirection = tileDirection();
+            Debug.Log($"{tileDirection()} + {index}");
+
+            if (tileDirection() == Direction.NORTH)
             {
                 northNeighbor.OnCollapsed();
-                WaveFunctionManager.waveDirection = Direction.NORTH;
             }
-            else if (eastNeighbor != null && !eastNeighbor.collapsed 
-            && (WaveFunctionManager.waveDirection == Direction.NORTH
-            || WaveFunctionManager.waveDirection == Direction.EAST))
+            else if (tileDirection() == Direction.EAST)
             {
                 eastNeighbor.OnCollapsed();
-                WaveFunctionManager.waveDirection = Direction.EAST;
             }
-            else if (southNeighbor != null && !southNeighbor.collapsed
-            && (WaveFunctionManager.waveDirection == Direction.EAST
-            || WaveFunctionManager.waveDirection == Direction.SOUTH))
+            else if (tileDirection() == Direction.SOUTH)
             {
                 southNeighbor.OnCollapsed();
-                WaveFunctionManager.waveDirection = Direction.SOUTH;
-            } else if(westNeighbor != null && !westNeighbor.collapsed)
+            } 
+            else if(tileDirection() == Direction.WEST)
             {
                 westNeighbor.OnCollapsed();
-                WaveFunctionManager.waveDirection = Direction.WEST;
             }
         }
     }
-    void NeighborChecks()
+ 
+    Direction tileDirection()
+    {
+        // North West or West        
+        if ((Corner() == SW ^ GetEdges()[3]) && !GetEdges()[0]) return Direction.NORTH;
+
+        // North East or North
+        else if ((Corner() == NW ^ GetEdges()[0]) && !GetEdges()[1] ) return Direction.EAST;
+        
+        // North East or South
+        else if ((Corner() == NW ^ GetEdges()[1]) && !GetEdges()[2] ) return Direction.SOUTH;
+
+        // North East or South
+        else if ((Corner() == SE ^ GetEdges()[2]) && !GetEdges()[3] ) return Direction.WEST;
+        Debug.Log(string.Join(", ", GetEdges().ToArray()));
+
+        return Direction.NONE;
+    }
+    List<bool> GetEdges()
+    {
+        bool northCollapse = northNeighbor == null || northNeighbor.collapsed;
+        bool eastCollapse = eastNeighbor == null || eastNeighbor.collapsed;
+        bool southCollapse = southNeighbor == null || southNeighbor.collapsed;
+        bool westCollapse = westNeighbor == null || westNeighbor.collapsed;
+
+        return new List<bool>() { northCollapse, eastCollapse, southCollapse, westCollapse };
+    }
+
+    int Corner()
+    {
+        if (GetEdges() == new List<bool>(){true, true, false, false})
+        {
+            return NE;
+        }
+        else if (GetEdges() == new List<bool>(){false, true, true, false})
+        {
+            return SE;
+        }
+        else if (GetEdges() == new List<bool>(){false, false, true, true})
+        {
+            return SW;
+        }
+        else if (GetEdges() == new List<bool>(){true, false, false, true})
+        {
+            return NW;
+        }
+        return 0;
+    }
+    void GetNeighbors()
     {
         List<CurrentTile> grid = GridManager.grid;
 
@@ -138,8 +179,8 @@ public class CurrentTile : Cell
         if (!GetWestColumnEdgeCheck())
         {
             westNeighbor = grid[(index - 1)-1];
-        }        
-    }
+        }   
+    }  
     public void RollForTile(int random)
     {
         spriteRenderer.sprite = backgrounds[random];
@@ -155,9 +196,8 @@ public class CurrentTile : Cell
             List<Tile> neighbors = new List<Tile>();
             List<Sprite> sprites = new List<Sprite>();
 
-            for (int i = 0; i < northNeighbor.tileSet.Tiles.Count - 1; i++)
+            for (int i = 0; i < northNeighbor.tileSet.Tiles.Count; i++)
             {   
-
                 if (tile.NORTH == northNeighbor.tileSet.Tiles[i].SOUTH)
                 {
                     neighbors.Add(northNeighbor.tileSet.Tiles[i]);
@@ -173,7 +213,7 @@ public class CurrentTile : Cell
             List<Tile> neighbors = new List<Tile>();
             List<Sprite> sprites = new List<Sprite>(); 
 
-            for (int i = 0; i < eastNeighbor.tileSet.Tiles.Count - 1; i++)
+            for (int i = 0; i < eastNeighbor.tileSet.Tiles.Count; i++)
             {
                 if (eastNeighbor.tileSet.Tiles[i].WEST == tile.EAST)
                 {
@@ -191,7 +231,7 @@ public class CurrentTile : Cell
             List<Sprite> sprites = new List<Sprite>(16);   
 
 
-            for (int i = 0; i < southNeighbor.tileSet.Tiles.Count - 1; i++)
+            for (int i = 0; i < southNeighbor.tileSet.Tiles.Count; i++)
             {
                 if (southNeighbor.tileSet.Tiles[i].NORTH == tile.SOUTH)
                 {
@@ -208,7 +248,7 @@ public class CurrentTile : Cell
             List<Tile> neighbors = new List<Tile>();
             List<Sprite> sprites = new List<Sprite>(); 
 
-            for (int i = 0; i < westNeighbor.tileSet.Tiles.Count - 1; i++)
+            for (int i = 0; i < westNeighbor.tileSet.Tiles.Count; i++)
             {
                 if (westNeighbor.tileSet.Tiles[i].EAST == tile.WEST)
                 {

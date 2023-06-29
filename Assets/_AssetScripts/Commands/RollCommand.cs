@@ -22,21 +22,31 @@ public class RollCommand : TileCommand
 
         if (CurrentTile.backgrounds.Count > 0)
         {
-            randomNext = random.Next(0, CurrentTile.backgrounds.Count-1);
+            randomNext = random.Next(0, CurrentTile.backgrounds.Count);
 
-            CurrentTile.RollForTile(randomNext);
+            
+            if (CurrentTile.index == 1)
+            {
+               CurrentTile.RollForTile(15);
+            }
+            else
+            {
+                CurrentTile.RollForTile(randomNext);
+            }
+
             GridManager.waveIndex.Add(CurrentTile);
             CurrentTile.collapsed = true;
+
 
             CommandManager.PushTileCommand(this);
         }
         else
         {
-            CurrentTile.failed = true;
+            // CurrentTile.failed = true;
 
-            BackTrackCommand backTrackCommand = new BackTrackCommand(CommandManager, GridManager);
+            // BackTrackCommand backTrackCommand = new BackTrackCommand(CommandManager, GridManager);
 
-            backTrackCommand.Execute();
+            // backTrackCommand.Execute();
 
             if (GridManager.waveIndex.Count == GridManager.columnNumber * GridManager.rowNumber)
             {

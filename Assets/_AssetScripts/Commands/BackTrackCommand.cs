@@ -24,7 +24,6 @@ public class BackTrackCommand : TileCommand
         GridManager.waveIndex[GridManager.waveIndex.Count - 2 - GridManager.backtrackIndex].OnCollapsed();
 
         GridManager.waveIndex.RemoveAt(GridManager.waveIndex.Count - GridManager.backtrackIndex);
-        Debug.Log(GridManager.backtrackIndex);
     }
 
     public override void Undo()

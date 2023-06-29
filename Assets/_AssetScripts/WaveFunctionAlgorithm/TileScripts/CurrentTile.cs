@@ -60,11 +60,9 @@ public class CurrentTile : Cell
             eleminate.Execute();
             yield return null;
 
-            // if (!GridManager.grid[index].collapsed)
-            // {
-            //     GridManager.grid[index].OnCollapsed();
-            // }
-            Collapse();
+            WestToEastCollapse();
+
+            //SpiralCollapse();
 
             yield return null;
         }
@@ -72,7 +70,8 @@ public class CurrentTile : Cell
         collapsed = true;
         yield return null;
 
-        void Collapse()
+    }
+    void SpiralCollapse()
         {
             WaveFunctionManager.waveDirection = tileDirection();
             Debug.Log($"{tileDirection()} + {index}");
@@ -94,26 +93,31 @@ public class CurrentTile : Cell
                 westNeighbor.OnCollapsed();
             }
         }
+    void WestToEastCollapse()
+    {
+        if (!GridManager.grid[index].collapsed)
+        {
+            GridManager.grid[index].OnCollapsed();
+        }
     }
- 
     Direction tileDirection()
     {
         // North West or West        
-        if ((Corner() == SW ^ GetEdges()[3]) && !GetEdges()[0]) return Direction.NORTH;
+        if ((GetCornerContacts() == SW ^ GetContacts()[3]) && !GetContacts()[0]) return Direction.NORTH;
 
         // North East or North
-        else if ((Corner() == NW ^ GetEdges()[0]) && !GetEdges()[1] ) return Direction.EAST;
+        else if ((GetCornerContacts() == NW ^ GetContacts()[0]) && !GetContacts()[1] ) return Direction.EAST;
         
         // North East or South
-        else if ((Corner() == NW ^ GetEdges()[1]) && !GetEdges()[2] ) return Direction.SOUTH;
+        else if ((GetCornerContacts() == NW ^ GetContacts()[1]) && !GetContacts()[2] ) return Direction.SOUTH;
 
         // North East or South
-        else if ((Corner() == SE ^ GetEdges()[2]) && !GetEdges()[3] ) return Direction.WEST;
-        Debug.Log(string.Join(", ", GetEdges().ToArray()));
+        else if ((GetCornerContacts() == SE ^ GetContacts()[2]) && !GetContacts()[3] ) return Direction.WEST;
+        Debug.Log(string.Join(", ", GetContacts().ToArray()));
 
         return Direction.NONE;
     }
-    List<bool> GetEdges()
+    List<bool> GetContacts()
     {
         bool northCollapse = northNeighbor == null || northNeighbor.collapsed;
         bool eastCollapse = eastNeighbor == null || eastNeighbor.collapsed;
@@ -123,21 +127,21 @@ public class CurrentTile : Cell
         return new List<bool>() { northCollapse, eastCollapse, southCollapse, westCollapse };
     }
 
-    int Corner()
+    int GetCornerContacts()
     {
-        if (GetEdges() == new List<bool>(){true, true, false, false})
+        if (GetContacts() == new List<bool>(){true, true, false, false})
         {
             return NE;
         }
-        else if (GetEdges() == new List<bool>(){false, true, true, false})
+        else if (GetContacts() == new List<bool>(){false, true, true, false})
         {
             return SE;
         }
-        else if (GetEdges() == new List<bool>(){false, false, true, true})
+        else if (GetContacts() == new List<bool>(){false, false, true, true})
         {
             return SW;
         }
-        else if (GetEdges() == new List<bool>(){true, false, false, true})
+        else if (GetContacts() == new List<bool>(){true, false, false, true})
         {
             return NW;
         }
@@ -147,36 +151,36 @@ public class CurrentTile : Cell
     {
         List<CurrentTile> grid = GridManager.grid;
 
-        bool GetNorthEdgeCheck()
+        bool NorthNeighborExists()
         {
-            return Mathf.Ceil(index / GridManager.columnNumber) == GridManager.columnNumber - 1 || index == GridManager.columnNumber * GridManager.rowNumber;
+            return !(Mathf.Ceil(index / GridManager.columnNumber) == GridManager.columnNumber - 1 || index == GridManager.columnNumber * GridManager.rowNumber);
         }
-        bool GetEastColumnCheck()
+        bool EastNeighborExists()
         {
-            return index % GridManager.columnNumber == 0;
+            return !(index % GridManager.columnNumber == 0);
         }
-        bool GetSouthEdgeCheck()
+        bool SouthNeighborExists()
         {
-            return Mathf.Ceil(index / GridManager.columnNumber) == 0 || index == GridManager.columnNumber;
+            return !(Mathf.Ceil(index / GridManager.columnNumber) == 0 || index == GridManager.columnNumber);
         }        
-        bool GetWestColumnEdgeCheck()
+        bool WestNeighborExists()
         {
-            return index % GridManager.columnNumber == 1;
+            return !(index % GridManager.columnNumber == 1);
         }
 
-        if (!GetNorthEdgeCheck())
+        if (NorthNeighborExists())
         {
             northNeighbor = grid[(index - 1) + GridManager.columnNumber];
         }
-        if (!GetEastColumnCheck())
+        if (EastNeighborExists())
         {
             eastNeighbor = grid[(index - 1) + 1];
         }
-        if (!GetSouthEdgeCheck())
+        if (SouthNeighborExists())
         {
             southNeighbor = grid[(index - 1) - GridManager.columnNumber];
         }
-        if (!GetWestColumnEdgeCheck())
+        if (WestNeighborExists())
         {
             westNeighbor = grid[(index - 1)-1];
         }   

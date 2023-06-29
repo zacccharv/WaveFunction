@@ -5,6 +5,7 @@ using UnityEngine;
 public class WaveFunctionManager : MonoBehaviour
 {
     public CommandManager CommandManager { get { return FindAnyObjectByType<CommandManager>(); } }
+    public static Direction waveDirection = Direction.NONE;
 
     public GridManager gridManager;
     public List<CurrentTile> currentTiles = new List<CurrentTile>();

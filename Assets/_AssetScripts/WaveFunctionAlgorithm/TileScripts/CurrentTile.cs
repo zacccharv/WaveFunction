@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
 public class CurrentTile : Cell
 {
     public bool startTile;
@@ -12,9 +11,7 @@ public class CurrentTile : Cell
     public TileSet tileSet = new TileSet();
     public List<Socket> sockets = new List<Socket>();
     public Sprite initSprite;
-
     public CurrentTile northNeighbor;
-
     public CurrentTile eastNeighbor;
 
     public CurrentTile southNeighbor;
@@ -62,11 +59,11 @@ public class CurrentTile : Cell
             eleminate.Execute();
             yield return null;
 
-            if (!GridManager.grid[index].collapsed)
-            {
-                GridManager.grid[index].OnCollapsed();
-            }
-            // Collapse();
+            // if (!GridManager.grid[index].collapsed)
+            // {
+            //     GridManager.grid[index].OnCollapsed();
+            // }
+            Collapse();
 
             yield return null;
         }
@@ -76,21 +73,32 @@ public class CurrentTile : Cell
 
         void Collapse()
         {
-            if (northNeighbor != null && !northNeighbor.collapsed)
+            // TODO Create list rotater
+            if (northNeighbor != null && !northNeighbor.collapsed 
+            && (WaveFunctionManager.waveDirection == Direction.NONE
+            || WaveFunctionManager.waveDirection == Direction.WEST
+            || WaveFunctionManager.waveDirection == Direction.NORTH))
             {
                 northNeighbor.OnCollapsed();
+                WaveFunctionManager.waveDirection = Direction.NORTH;
             }
-            else if (eastNeighbor != null && !eastNeighbor.collapsed)
+            else if (eastNeighbor != null && !eastNeighbor.collapsed 
+            && (WaveFunctionManager.waveDirection == Direction.NORTH
+            || WaveFunctionManager.waveDirection == Direction.EAST))
             {
                 eastNeighbor.OnCollapsed();
+                WaveFunctionManager.waveDirection = Direction.EAST;
             }
-            else if (southNeighbor != null && !southNeighbor.collapsed)
+            else if (southNeighbor != null && !southNeighbor.collapsed
+            && (WaveFunctionManager.waveDirection == Direction.EAST
+            || WaveFunctionManager.waveDirection == Direction.SOUTH))
             {
                 southNeighbor.OnCollapsed();
-            }
-            else if (westNeighbor != null && !westNeighbor.collapsed)
+                WaveFunctionManager.waveDirection = Direction.SOUTH;
+            } else if(westNeighbor != null && !westNeighbor.collapsed)
             {
                 westNeighbor.OnCollapsed();
+                WaveFunctionManager.waveDirection = Direction.WEST;
             }
         }
     }

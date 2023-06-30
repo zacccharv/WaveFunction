@@ -1,5 +1,6 @@
 public enum Socket
 {
     empty,
-    line
+    line,
+    filledIn
 }

@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class CollapseCommand : TileCommand
 {
-    public override CurrentTile CurrentTile { get; set; }
+    public override Cell Cell { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
-    public CollapseCommand(CurrentTile target, CommandManager commandManager, GridManager gridManager)
+    public CollapseCommand(Cell target, CommandManager commandManager, GridManager gridManager)
     {
-        CurrentTile = target;
+        Cell = target;
         CommandManager = commandManager;
         GridManager = gridManager;
     }
@@ -20,29 +20,24 @@ public class CollapseCommand : TileCommand
         int randomNext = 0;
         System.Random random = new System.Random();
 
-        if (CurrentTile.backgrounds.Count > 0)
+        if (Cell.backgrounds.Count > 0)
         {
-            randomNext = random.Next(0, CurrentTile.backgrounds.Count);
+            randomNext = random.Next(0, Cell.backgrounds.Count);
 
             
-            if (CurrentTile.index == 1)
-            {
-               CurrentTile.RollForTile(15);
-            }
-            else
-            {
-                CurrentTile.RollForTile(randomNext);
-            }
 
-            GridManager.waveIndex.Add(CurrentTile);
-            CurrentTile.collapsed = true;
+                Cell.RollForTile(randomNext);
+
+
+            GridManager.waveIndex.Add(Cell);
+            Cell.Collapsed = true;
 
 
             CommandManager.PushTileCommand(this);
         }
         else
         {
-            // CurrentTile.failed = true;
+            // Cell.failed = true;
 
             // BackTrackCommand backTrackCommand = new BackTrackCommand(CommandManager, GridManager);
 
@@ -50,18 +45,18 @@ public class CollapseCommand : TileCommand
 
             if (GridManager.waveIndex.Count == GridManager.columnNumber * GridManager.rowNumber)
             {
-                CurrentTile.StopAllCoroutines();
+                Cell.StopAllCoroutines();
             }
         }
     }
 
     public override void Undo()
     {
-        CurrentTile.spriteRenderer.sprite = CurrentTile.initSprite;
+        Cell.spriteRenderer.sprite = Cell.initSprite;
 
-        CurrentTile.sockets = new List<Socket>() { Socket.empty, Socket.empty, Socket.empty, Socket.empty };
+        Cell.sockets = new List<Socket>() { Socket.empty, Socket.empty, Socket.empty, Socket.empty };
 
-        GridManager.waveIndex.Remove(CurrentTile);
-        CurrentTile.collapsed = false;
+        GridManager.waveIndex.Remove(Cell);
+        Cell.Collapsed = false;
     }
 }

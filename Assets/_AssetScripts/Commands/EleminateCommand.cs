@@ -4,36 +4,36 @@ using UnityEngine;
 
 public class EleminateCommand : TileCommand
 {
-    public override CurrentTile CurrentTile { get; set; }
+    public override Cell Cell { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
     List<List<Tile>> _neighbors = new List<List<Tile>>();
     List<List<Sprite>> _sprites = new List<List<Sprite>>();
     
-    public EleminateCommand(CurrentTile target, CommandManager commandManager, GridManager gridManager)
+    public EleminateCommand(Cell target, CommandManager commandManager, GridManager gridManager)
     {
-        CurrentTile = target;
+        Cell = target;
 
-        if (target.neighborTiles[0] != null)
+        if (target.northNeighbor != null)
         {
-            _neighbors.Add(target.neighborTiles[0].tileSet.Tiles);
-            _sprites.Add(target.neighborTiles[0].backgrounds);
+            _neighbors.Add(target.northNeighbor.tileSet.Tiles);
+            _sprites.Add(target.northNeighbor.backgrounds);
         }
-        if (target.neighborTiles[1] != null)
+        if (target.eastNeighbor != null)
         {
-            _neighbors.Add(target.neighborTiles[1].tileSet.Tiles);
-            _sprites.Add(target.neighborTiles[1].backgrounds);
+            _neighbors.Add(target.eastNeighbor.tileSet.Tiles);
+            _sprites.Add(target.eastNeighbor.backgrounds);
         }
-        if (target.neighborTiles[2] != null)
+        if (target.southNeighbor != null)
         {
-            _neighbors.Add(target.neighborTiles[2].tileSet.Tiles);
-            _sprites.Add(target.neighborTiles[2].backgrounds);
+            _neighbors.Add(target.southNeighbor.tileSet.Tiles);
+            _sprites.Add(target.southNeighbor.backgrounds);
         }
-        if (target.neighborTiles[3] != null)
+        if (target.westNeighbor != null)
         {
-            _neighbors.Add(target.neighborTiles[3].tileSet.Tiles);
-            _sprites.Add(target.neighborTiles[3].backgrounds);
+            _neighbors.Add(target.westNeighbor.tileSet.Tiles);
+            _sprites.Add(target.westNeighbor.backgrounds);
         }
 
         CommandManager = commandManager;
@@ -42,31 +42,31 @@ public class EleminateCommand : TileCommand
 
     public override void Execute()
     {
-        CurrentTile.RemoveNeighborsFromLists();
+        Cell.RemoveNeighborsFromLists();
         CommandManager.PushTileCommand(this);
     }
 
     public override void Undo()
     {
-        if (CurrentTile.neighborTiles[0] != null)
+        if (Cell.northNeighbor != null)
         {
-            CurrentTile.neighborTiles[0].tileSet.Tiles = _neighbors[0];            
-            CurrentTile.neighborTiles[0].backgrounds = _sprites[0];
+            Cell.northNeighbor.tileSet.Tiles = _neighbors[0];            
+            Cell.northNeighbor.backgrounds = _sprites[0];
         }
-        if (CurrentTile.neighborTiles[1] != null)
+        if (Cell.eastNeighbor != null)
         {
-            CurrentTile.neighborTiles[1].tileSet.Tiles = _neighbors[1];            
-            CurrentTile.neighborTiles[1].backgrounds = _sprites[1];
+            Cell.eastNeighbor.tileSet.Tiles = _neighbors[1];            
+            Cell.eastNeighbor.backgrounds = _sprites[1];
         }
-        if (CurrentTile.neighborTiles[2] != null)
+        if (Cell.southNeighbor != null)
         {
-            CurrentTile.neighborTiles[2].tileSet.Tiles = _neighbors[2];            
-            CurrentTile.neighborTiles[2].backgrounds = _sprites[2];
+            Cell.southNeighbor.tileSet.Tiles = _neighbors[2];            
+            Cell.southNeighbor.backgrounds = _sprites[2];
         }
-        if (CurrentTile.neighborTiles[3] != null)
+        if (Cell.westNeighbor != null)
         {
-            CurrentTile.neighborTiles[3].tileSet.Tiles = _neighbors[3];            
-            CurrentTile.neighborTiles[3].backgrounds = _sprites[3];
+            Cell.westNeighbor.tileSet.Tiles = _neighbors[3];            
+            Cell.westNeighbor.backgrounds = _sprites[3];
         }
     }
 }

@@ -94,11 +94,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6712415181842412849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb55965e151a17e48836ad31a73b9d1d, type: 3}
+  m_Script: {fileID: 11500000, guid: 19dfc1d329882764787ea5853a61b297, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collapsed: 0
-  index: 0
+  <Index>k__BackingField: 0
+  <Collapsed>k__BackingField: 0
   startTile: 0
   failed: 0
   sockets: 

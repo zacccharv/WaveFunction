@@ -1,12 +1,12 @@
 using System.Collections;
 public struct Tile
 {
-    public Tile(Socket a, Socket b, Socket c, Socket d)
+    public Tile(Socket north, Socket east, Socket south, Socket west)
     {
-        NORTH = a;
-        EAST = b;
-        SOUTH = c;
-        WEST = d;
+        NORTH = north;
+        EAST = east;
+        SOUTH = south;
+        WEST = west;
     }
     public Socket NORTH { get; }
     public Socket EAST { get; }

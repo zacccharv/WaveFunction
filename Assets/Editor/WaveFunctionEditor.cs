@@ -18,7 +18,7 @@ public class WaveFunctionEditor : Editor
         {
             WaveFunctionManager manager = target as WaveFunctionManager;
 
-            manager.currentTiles[0].OnCollapsed();
+            manager.Cells[464].OnCollapsed();
         }
     }
 }

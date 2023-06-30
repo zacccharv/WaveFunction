@@ -83,7 +83,7 @@ sub watchman_query {
 	# changed since $last_update_token but not from the .git folder.
 	#
 	# To accomplish this, we're using the "since" generator to use the
-	# recency index to select candidate nodes and "fields" to limit the
+	# recency Index to select candidate nodes and "fields" to limit the
 	# output to file names only. Then we're using the "expression" term to
 	# further constrain the results.
 	if (substr($last_update_token, 0, 1) eq "c") {

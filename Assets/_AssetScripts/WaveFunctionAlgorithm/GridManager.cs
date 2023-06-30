@@ -7,13 +7,22 @@ public class GridManager : MonoBehaviour
 {
     public int backtrackIndex = 0;
     public CommandManager CommandManager { get { return FindAnyObjectByType(typeof(CommandManager)) as CommandManager;  } }
-    public int columnNumber = 10, rowNumber = 10;
+
+    [field: SerializeField] public int DIM { get; set; }
+
+    [HideInInspector] public int columnNumber = 10, rowNumber = 10;
     public float tileWidth = 1, tileHeight = 1;
-    public List<CurrentTile> grid = new List<CurrentTile>();
-    public List<CurrentTile> waveIndex = new List<CurrentTile>();
+    public List<Cell> grid = new List<Cell>();
+    public List<Cell> waveIndex = new List<Cell>();
     public GameObject gridItem;
     public float offset = 4.5f;
     public int currentIndex = 0;
+
+    void Awake()
+    {
+        columnNumber = DIM;
+        rowNumber = DIM;
+    }
 
     public void DrawGrid()
     {
@@ -36,13 +45,13 @@ public class GridManager : MonoBehaviour
         obj.transform.localScale = new Vector3(tileWidth, tileHeight);
         currentIndex++;
 
-        obj.GetComponent<Cell>().index = currentIndex;
+        obj.GetComponent<CellBase>().Index = currentIndex;
 
         if (currentIndex == 1)
         {
-            obj.GetComponent<CurrentTile>().startTile = true;
+            obj.GetComponent<Cell>().startTile = true;
         }
 
-        grid.Add(obj.GetComponent<CurrentTile>());
+        grid.Add(obj.GetComponent<Cell>());
     }
 }

@@ -58,12 +58,12 @@ public class EleminateCommand : TileCommand
             Cell.eastNeighbor.tileSet.Tiles = _neighbors[1];            
             Cell.eastNeighbor.backgrounds = _sprites[1];
         }
-        if (Cell.southNeighbor != null)
-        {
+        if (Cell.southNeighbor != null && _neighbors.Count > 2)
+        {      
             Cell.southNeighbor.tileSet.Tiles = _neighbors[2];            
             Cell.southNeighbor.backgrounds = _sprites[2];
         }
-        if (Cell.westNeighbor != null)
+        if (Cell.westNeighbor != null && _neighbors.Count > 3)
         {
             Cell.westNeighbor.tileSet.Tiles = _neighbors[3];            
             Cell.westNeighbor.backgrounds = _sprites[3];

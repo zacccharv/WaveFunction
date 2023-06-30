@@ -6,6 +6,7 @@ using UnityEngine;
 public class Cell : CellBase
 {
     public bool startTile;
+    public int cellFailIndex = 1;
     public bool failed;
     public Tile tile = new Tile();
     public TileSet tileSet = new TileSet();
@@ -46,6 +47,13 @@ public class Cell : CellBase
 
     public IEnumerator WaveFunction()
     {
+        
+        /*if (GridManager.waveIndex.Count > (GridManager.DIM * GridManager.DIM) - 2)
+        {
+            Debug.Log("WaveFunction Cancelled");
+            StopAllCoroutines();
+        } */
+
         if (!Collapsed)
         {
             CollapseCommand collapse = new CollapseCommand(this, CommandManager, GridManager);
@@ -62,9 +70,19 @@ public class Cell : CellBase
 
             // SpiralWave();
 
+            if (sockets.Count == 0)
+            {
+                Debug.Log($"Uncollapsed at Index {Index} but shouldn't have been. Before Entropy");
+            }
+
             EntropyWave();
 
             yield return null;
+        }
+
+        if (sockets.Count == 0)
+        {
+            Debug.Log($"Uncollapsed at Index {Index} but shouldn't have been. After Entropy");
         }
 
         Collapsed = true;
@@ -81,27 +99,51 @@ public class Cell : CellBase
 
             for (int i = 0; i < tileSet.Length; i++)
             {
-               if (tileSet[i] != null && !tileSet[i].Collapsed) entropyAmounts.Add(tileSet[i].tileSet.Tiles.Count);
+                if (tileSet[i] != null && !tileSet[i].Collapsed) entropyAmounts.Add(tileSet[i].tileSet.Tiles.Count);
             }
         }
         GetEntropy(southNeighbor, eastNeighbor, northNeighbor, westNeighbor);
-        
+
+        if (entropyAmounts.Count == 0)
+        {
+            BackTrackCommand backTrackCommand = new BackTrackCommand(this, CommandManager, GridManager);
+            backTrackCommand.Execute();
+        }
+
         int smallestEntropy = Mathf.Min(entropyAmounts.ToArray());
-        Debug.Log(string.Join(", ", entropyAmounts.ToArray()));
+
+        // if (smallestEntropy == 0)
+        // {
+        //     Debug.Log(this.Index);
+        //     this.StopAllCoroutines();
+        // }
 
         Cell CollapsibleTile(Cell north = null, Cell east = null, Cell south = null, Cell west = null)
         {
             Cell[] tileSet = { north, east, south, west };
+            List<Cell> cells = new List<Cell>();
 
             for (int i = 0; i < tileSet.Length; i++)
             {
                 if (tileSet[i] != null && tileSet[i].tileSet.Tiles.Count == smallestEntropy && !tileSet[i].Collapsed)
                 {
-                    return tileSet[i];
+                    cells.Add(tileSet[i]);
                 }
             }
-            StopAllCoroutines();
-            return null;
+            if (cells.Count == 0)
+            {
+                return null;
+            }
+
+            int smallest = new System.Random().Next(0, cells.Count);
+            
+            return cells[smallest];
+        }
+
+        if (CollapsibleTile(northNeighbor, eastNeighbor, southNeighbor, westNeighbor) == null)
+        {
+            Debug.Log(this.Index);
+            return;
         }
 
         CollapsibleTile(northNeighbor, eastNeighbor, southNeighbor, westNeighbor).OnCollapsed();

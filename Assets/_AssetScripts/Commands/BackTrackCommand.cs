@@ -8,22 +8,23 @@ public class BackTrackCommand : TileCommand
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
-    public BackTrackCommand (CommandManager commandManager, GridManager gridManager)
+    public BackTrackCommand (Cell cell, CommandManager commandManager, GridManager gridManager)
     {
+        Cell = cell;
         CommandManager = commandManager;
         GridManager = gridManager;
     }
 
     public override void Execute()
     {
-        GridManager.backtrackIndex += 1;
-        CommandManager.UndoTileChunk(GridManager.backtrackIndex);
+        Cell.cellFailIndex += 1;
 
-        GridManager.waveIndex[GridManager.waveIndex.Count - 2 - GridManager.backtrackIndex].Collapsed = false;
+        CommandManager.UndoTileChunk(Cell.cellFailIndex);
+        GridManager.waveIndex.Remove(GridManager.waveIndex[GridManager.waveIndex.Count - 1]);
 
-        GridManager.waveIndex[GridManager.waveIndex.Count - 2 - GridManager.backtrackIndex].OnCollapsed();
+        GridManager.waveIndex[GridManager.waveIndex.Count - 1].Collapsed = false;
 
-        GridManager.waveIndex.RemoveAt(GridManager.waveIndex.Count - GridManager.backtrackIndex);
+        GridManager.waveIndex[GridManager.waveIndex.Count - 1].OnCollapsed();
     }
 
     public override void Undo()

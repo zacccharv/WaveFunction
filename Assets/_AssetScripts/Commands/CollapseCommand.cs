@@ -24,26 +24,31 @@ public class CollapseCommand : TileCommand
         {
             randomNext = random.Next(0, Cell.backgrounds.Count);
 
-            
-
-                Cell.RollForTile(randomNext);
-
+            Cell.RollForTile(randomNext);
 
             GridManager.waveIndex.Add(Cell);
-            Cell.Collapsed = true;
 
+            if (Cell.sockets.Count == 0)
+            {
+                Debug.Log($"{Cell.Index} Has Collapsed with no sockets");
+            }
+
+            if (Cell.sockets.Count == 0)
+            { 
+                Cell.Collapsed = true; 
+            }
 
             CommandManager.PushTileCommand(this);
         }
         else
         {
-            // Cell.failed = true;
+            Cell.failed = true;
 
-            // BackTrackCommand backTrackCommand = new BackTrackCommand(CommandManager, GridManager);
+            BackTrackCommand backTrackCommand = new BackTrackCommand(Cell ,CommandManager, GridManager);
 
-            // backTrackCommand.Execute();
+            backTrackCommand.Execute();
 
-            if (GridManager.waveIndex.Count == GridManager.columnNumber * GridManager.rowNumber)
+            if (GridManager.waveIndex.Count == GridManager.DIM * GridManager.DIM)
             {
                 Cell.StopAllCoroutines();
             }
@@ -52,11 +57,11 @@ public class CollapseCommand : TileCommand
 
     public override void Undo()
     {
-        Cell.spriteRenderer.sprite = Cell.initSprite;
-
-        Cell.sockets = new List<Socket>() { Socket.empty, Socket.empty, Socket.empty, Socket.empty };
-
-        GridManager.waveIndex.Remove(Cell);
         Cell.Collapsed = false;
+        Cell.spriteRenderer.sprite = Cell.initSprite;
+        Cell.tile = new Tile();
+        Cell.sockets = new List<Socket>();
+        Cell.tileSet = new TileSet();
+        Cell.backgrounds = Cell.WaveFunctionManager.backgrounds;
     }
 }

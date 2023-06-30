@@ -6,6 +6,7 @@ public class CommandManagerEditor : Editor
 {
     public override void OnInspectorGUI()
     {
+        DrawDefaultInspector();
         if (GUILayout.Button("Undo"))
         {  
             CommandManager manager = target as CommandManager;

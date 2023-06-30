@@ -15,25 +15,25 @@ public class EleminateCommand : TileCommand
     {
         CurrentTile = target;
 
-        if (target.northNeighbor != null)
+        if (target.neighborTiles[0] != null)
         {
-            _neighbors.Add(target.northNeighbor.tileSet.Tiles);
-            _sprites.Add(target.northNeighbor.backgrounds);
+            _neighbors.Add(target.neighborTiles[0].tileSet.Tiles);
+            _sprites.Add(target.neighborTiles[0].backgrounds);
         }
-        if (target.eastNeighbor != null)
+        if (target.neighborTiles[1] != null)
         {
-            _neighbors.Add(target.eastNeighbor.tileSet.Tiles);
-            _sprites.Add(target.eastNeighbor.backgrounds);
+            _neighbors.Add(target.neighborTiles[1].tileSet.Tiles);
+            _sprites.Add(target.neighborTiles[1].backgrounds);
         }
-        if (target.southNeighbor != null)
+        if (target.neighborTiles[2] != null)
         {
-            _neighbors.Add(target.southNeighbor.tileSet.Tiles);
-            _sprites.Add(target.southNeighbor.backgrounds);
+            _neighbors.Add(target.neighborTiles[2].tileSet.Tiles);
+            _sprites.Add(target.neighborTiles[2].backgrounds);
         }
-        if (target.westNeighbor != null)
+        if (target.neighborTiles[3] != null)
         {
-            _neighbors.Add(target.westNeighbor.tileSet.Tiles);
-            _sprites.Add(target.westNeighbor.backgrounds);
+            _neighbors.Add(target.neighborTiles[3].tileSet.Tiles);
+            _sprites.Add(target.neighborTiles[3].backgrounds);
         }
 
         CommandManager = commandManager;
@@ -48,25 +48,25 @@ public class EleminateCommand : TileCommand
 
     public override void Undo()
     {
-        if (CurrentTile.northNeighbor != null)
+        if (CurrentTile.neighborTiles[0] != null)
         {
-            CurrentTile.northNeighbor.tileSet.Tiles = _neighbors[0];            
-            CurrentTile.northNeighbor.backgrounds = _sprites[0];
+            CurrentTile.neighborTiles[0].tileSet.Tiles = _neighbors[0];            
+            CurrentTile.neighborTiles[0].backgrounds = _sprites[0];
         }
-        if (CurrentTile.eastNeighbor != null)
+        if (CurrentTile.neighborTiles[1] != null)
         {
-            CurrentTile.eastNeighbor.tileSet.Tiles = _neighbors[1];            
-            CurrentTile.eastNeighbor.backgrounds = _sprites[1];
+            CurrentTile.neighborTiles[1].tileSet.Tiles = _neighbors[1];            
+            CurrentTile.neighborTiles[1].backgrounds = _sprites[1];
         }
-        if (CurrentTile.southNeighbor != null)
+        if (CurrentTile.neighborTiles[2] != null)
         {
-            CurrentTile.southNeighbor.tileSet.Tiles = _neighbors[2];            
-            CurrentTile.southNeighbor.backgrounds = _sprites[2];
+            CurrentTile.neighborTiles[2].tileSet.Tiles = _neighbors[2];            
+            CurrentTile.neighborTiles[2].backgrounds = _sprites[2];
         }
-        if (CurrentTile.westNeighbor != null)
+        if (CurrentTile.neighborTiles[3] != null)
         {
-            CurrentTile.westNeighbor.tileSet.Tiles = _neighbors[3];            
-            CurrentTile.westNeighbor.backgrounds = _sprites[3];
+            CurrentTile.neighborTiles[3].tileSet.Tiles = _neighbors[3];            
+            CurrentTile.neighborTiles[3].backgrounds = _sprites[3];
         }
     }
 }

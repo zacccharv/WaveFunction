@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RollCommand : TileCommand
+public class CollapseCommand : TileCommand
 {
     public override CurrentTile CurrentTile { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
-    public RollCommand(CurrentTile target, CommandManager commandManager, GridManager gridManager)
+    public CollapseCommand(CurrentTile target, CommandManager commandManager, GridManager gridManager)
     {
         CurrentTile = target;
         CommandManager = commandManager;

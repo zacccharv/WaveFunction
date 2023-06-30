@@ -11,12 +11,7 @@ public class CurrentTile : Cell
     public TileSet tileSet = new TileSet();
     public List<Socket> sockets = new List<Socket>();
     public Sprite initSprite;
-    public CurrentTile northNeighbor;
-    public CurrentTile eastNeighbor;
-
-    public CurrentTile southNeighbor;
-
-    public CurrentTile westNeighbor;
+    public List<CurrentTile> neighborTiles = new List<CurrentTile>(4);
 
     public List<Sprite> backgrounds = new List<Sprite>();
     public SpriteRenderer spriteRenderer;
@@ -34,35 +29,37 @@ public class CurrentTile : Cell
     private void Awake() 
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        GetNeighbors();
+        SetNeighbors();
 
         if (startTile)
         {
-            StartCoroutine(RunMethods());
+            StartCoroutine(WaveFunction());
         }
     }
     private void RunCoroutine()
     {
-        StartCoroutine(RunMethods());
+        StartCoroutine(WaveFunction());
     }
 
-    public IEnumerator RunMethods()
+    public IEnumerator WaveFunction()
     {
         if (!collapsed)
         {
-            RollCommand roll = new RollCommand(this, CommandManager, GridManager);
+            CollapseCommand collapse = new CollapseCommand(this, CommandManager, GridManager);
+            collapse.Execute();
 
-            roll.Execute();
             yield return null;
 
             EleminateCommand eleminate = new EleminateCommand(this, CommandManager, GridManager);
-
             eleminate.Execute();
+
             yield return null;
 
-            WestToEastCollapse();
+            // WestToEastWave();
 
-            //SpiralCollapse();
+            //SpiralWave();
+
+            EntropyWave();
 
             yield return null;
         }
@@ -71,29 +68,43 @@ public class CurrentTile : Cell
         yield return null;
 
     }
-    void SpiralCollapse()
+    void EntropyWave()
+    {
+        List<int> entropyAmounts = new List<int>();
+        Debug.Log(index);
+
+        foreach (var item in neighborTiles)
+        {
+            entropyAmounts.Add(item.tileSet.Tiles.Count);
+        }
+    
+        int smallestEntropy = Mathf.Min(entropyAmounts.ToArray());
+
+        CurrentTile collapsibleTile = neighborTiles.Find(f => f.tileSet.Tiles.Count == smallestEntropy);
+        collapsibleTile.OnCollapsed();
+    }
+    void SpiralWave()
         {
             WaveFunctionManager.waveDirection = tileDirection();
-            Debug.Log($"{tileDirection()} + {index}");
 
             if (tileDirection() == Direction.NORTH)
             {
-                northNeighbor.OnCollapsed();
+                neighborTiles[0].OnCollapsed();
             }
             else if (tileDirection() == Direction.EAST)
             {
-                eastNeighbor.OnCollapsed();
+                neighborTiles[1].OnCollapsed();
             }
             else if (tileDirection() == Direction.SOUTH)
             {
-                southNeighbor.OnCollapsed();
+                neighborTiles[2].OnCollapsed();
             } 
             else if(tileDirection() == Direction.WEST)
             {
-                westNeighbor.OnCollapsed();
+                neighborTiles[3].OnCollapsed();
             }
         }
-    void WestToEastCollapse()
+    void WestToEastWave()
     {
         if (!GridManager.grid[index].collapsed)
         {
@@ -119,14 +130,13 @@ public class CurrentTile : Cell
     }
     List<bool> GetContacts()
     {
-        bool northCollapse = northNeighbor == null || northNeighbor.collapsed;
-        bool eastCollapse = eastNeighbor == null || eastNeighbor.collapsed;
-        bool southCollapse = southNeighbor == null || southNeighbor.collapsed;
-        bool westCollapse = westNeighbor == null || westNeighbor.collapsed;
+        bool northCollapse = neighborTiles[0] == null || neighborTiles[0].collapsed;
+        bool eastCollapse = neighborTiles[1] == null || neighborTiles[1].collapsed;
+        bool southCollapse = neighborTiles[2] == null || neighborTiles[2].collapsed;
+        bool westCollapse = neighborTiles[3] == null || neighborTiles[3].collapsed;
 
         return new List<bool>() { northCollapse, eastCollapse, southCollapse, westCollapse };
     }
-
     int GetCornerContacts()
     {
         if (GetContacts() == new List<bool>(){true, true, false, false})
@@ -147,9 +157,11 @@ public class CurrentTile : Cell
         }
         return 0;
     }
-    void GetNeighbors()
+    void SetNeighbors()
     {
         List<CurrentTile> grid = GridManager.grid;
+        neighborTiles.Capacity = 4;
+        neighborTiles.AddRange(new List<CurrentTile>() { this, this, this, this });
 
         bool NorthNeighborExists()
         {
@@ -170,19 +182,19 @@ public class CurrentTile : Cell
 
         if (NorthNeighborExists())
         {
-            northNeighbor = grid[(index - 1) + GridManager.columnNumber];
+            neighborTiles[0] = (grid[(index - 1) + GridManager.columnNumber]);
         }
         if (EastNeighborExists())
         {
-            eastNeighbor = grid[(index - 1) + 1];
+            neighborTiles[1] = grid[(index - 1) + 1];            
         }
         if (SouthNeighborExists())
         {
-            southNeighbor = grid[(index - 1) - GridManager.columnNumber];
+            neighborTiles[2] = grid[(index - 1) - GridManager.columnNumber];            
         }
         if (WestNeighborExists())
         {
-            westNeighbor = grid[(index - 1)-1];
+            neighborTiles[3] = grid[(index - 1) - 1];
         }   
     }  
     public void RollForTile(int random)
@@ -195,73 +207,73 @@ public class CurrentTile : Cell
     }
     public void RemoveNeighborsFromLists()
     {
-        if (northNeighbor != null) 
+        if (neighborTiles[0] != null) 
         {
             List<Tile> neighbors = new List<Tile>();
             List<Sprite> sprites = new List<Sprite>();
 
-            for (int i = 0; i < northNeighbor.tileSet.Tiles.Count; i++)
+            for (int i = 0; i < neighborTiles[0].tileSet.Tiles.Count; i++)
             {   
-                if (tile.NORTH == northNeighbor.tileSet.Tiles[i].SOUTH)
+                if (tile.NORTH == neighborTiles[0].tileSet.Tiles[i].SOUTH)
                 {
-                    neighbors.Add(northNeighbor.tileSet.Tiles[i]);
-                    sprites.Add(northNeighbor.backgrounds[i]);
+                    neighbors.Add(neighborTiles[0].tileSet.Tiles[i]);
+                    sprites.Add(neighborTiles[0].backgrounds[i]);
                 }
             }
-            northNeighbor.tileSet.Tiles = neighbors;
-            northNeighbor.backgrounds = sprites;
+            neighborTiles[0].tileSet.Tiles = neighbors;
+            neighborTiles[0].backgrounds = sprites;
         }
 
-        if (eastNeighbor != null)
+        if (neighborTiles[1] != null)
         {
             List<Tile> neighbors = new List<Tile>();
             List<Sprite> sprites = new List<Sprite>(); 
 
-            for (int i = 0; i < eastNeighbor.tileSet.Tiles.Count; i++)
+            for (int i = 0; i < neighborTiles[1].tileSet.Tiles.Count; i++)
             {
-                if (eastNeighbor.tileSet.Tiles[i].WEST == tile.EAST)
+                if (neighborTiles[1].tileSet.Tiles[i].WEST == tile.EAST)
                 {
-                    neighbors.Add(eastNeighbor.tileSet.Tiles[i]);
-                    sprites.Add(eastNeighbor.backgrounds[i]);
+                    neighbors.Add(neighborTiles[1].tileSet.Tiles[i]);
+                    sprites.Add(neighborTiles[1].backgrounds[i]);
                 }
             }
-            eastNeighbor.tileSet.Tiles = neighbors;
-            eastNeighbor.backgrounds = sprites;
+            neighborTiles[1].tileSet.Tiles = neighbors;
+            neighborTiles[1].backgrounds = sprites;
         }
 
-        if (southNeighbor != null)
+        if (neighborTiles[2] != null)
         {
             List<Tile> neighbors = new List<Tile>(16);
             List<Sprite> sprites = new List<Sprite>(16);   
 
 
-            for (int i = 0; i < southNeighbor.tileSet.Tiles.Count; i++)
+            for (int i = 0; i < neighborTiles[2].tileSet.Tiles.Count; i++)
             {
-                if (southNeighbor.tileSet.Tiles[i].NORTH == tile.SOUTH)
+                if (neighborTiles[2].tileSet.Tiles[i].NORTH == tile.SOUTH)
                 {
-                    neighbors.Add(southNeighbor.tileSet.Tiles[i]);
-                    sprites.Add(southNeighbor.backgrounds[i]);
+                    neighbors.Add(neighborTiles[2].tileSet.Tiles[i]);
+                    sprites.Add(neighborTiles[2].backgrounds[i]);
                 }
             }
-            southNeighbor.tileSet.Tiles = neighbors;
-            southNeighbor.backgrounds = sprites;
+            neighborTiles[2].tileSet.Tiles = neighbors;
+            neighborTiles[2].backgrounds = sprites;
         }
 
-        if (westNeighbor != null)
+        if (neighborTiles[3] != null)
         {
             List<Tile> neighbors = new List<Tile>();
             List<Sprite> sprites = new List<Sprite>(); 
 
-            for (int i = 0; i < westNeighbor.tileSet.Tiles.Count; i++)
+            for (int i = 0; i < neighborTiles[3].tileSet.Tiles.Count; i++)
             {
-                if (westNeighbor.tileSet.Tiles[i].EAST == tile.WEST)
+                if (neighborTiles[3].tileSet.Tiles[i].EAST == tile.WEST)
                 {
-                    neighbors.Add(westNeighbor.tileSet.Tiles[i]);
-                    sprites.Add(westNeighbor.backgrounds[i]);
+                    neighbors.Add(neighborTiles[3].tileSet.Tiles[i]);
+                    sprites.Add(neighborTiles[3].backgrounds[i]);
                 }
             }
-            westNeighbor.tileSet.Tiles = neighbors;
-            westNeighbor.backgrounds = sprites;
+            neighborTiles[3].tileSet.Tiles = neighbors;
+            neighborTiles[3].backgrounds = sprites;
         }
     }
 }

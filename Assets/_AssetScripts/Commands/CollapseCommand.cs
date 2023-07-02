@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class CollapseCommand : TileCommand
 {
-    public override Cell Cell { get; set; }
+    public override CellBase CellBase { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
-    public CollapseCommand(Cell target, CommandManager commandManager, GridManager gridManager)
+    public CollapseCommand(CellBase target, CommandManager commandManager, GridManager gridManager)
     {
-        Cell = target;
+        CellBase = target;
         CommandManager = commandManager;
         GridManager = gridManager;
     }
@@ -20,48 +20,47 @@ public class CollapseCommand : TileCommand
         int randomNext = 0;
         System.Random random = new System.Random();
 
-        if (Cell.backgrounds.Count > 0)
+        if (CellBase.Cell.tileSet.Tiles.Count > 0)
         {
-            randomNext = random.Next(0, Cell.backgrounds.Count);
+            randomNext = random.Next(0, CellBase.Cell.tileSet.Tiles.Count);
 
-            Cell.RollForTile(randomNext);
+            CellBase.Cell.RollForTile(randomNext);
 
-            GridManager.waveIndex.Add(Cell);
+            GridManager.waveIndex.Add(CellBase);
 
-            if (Cell.sockets.Count == 0)
+            if (CellBase.sockets.Count == 0)
             {
-                Debug.Log($"{Cell.Index} Has Collapsed with no sockets");
+                Debug.Log($"{CellBase.Index} Has Collapsed with no sockets");
             }
 
-            if (Cell.sockets.Count == 0)
+            if (CellBase.sockets.Count == 0)
             { 
-                Cell.Collapsed = true; 
+                CellBase.Collapsed = true; 
             }
 
             CommandManager.PushTileCommand(this);
         }
         else
         {
-            Cell.failed = true;
+            CellBase.failed = true;
 
-            BackTrackCommand backTrackCommand = new BackTrackCommand(Cell ,CommandManager, GridManager);
+            BackTrackCommand backTrackCommand = new BackTrackCommand(CellBase ,CommandManager, GridManager);
 
             backTrackCommand.Execute();
 
             if (GridManager.waveIndex.Count == GridManager.DIM * GridManager.DIM)
             {
-                Cell.StopAllCoroutines();
+                CellBase.StopAllCoroutines();
             }
         }
     }
 
     public override void Undo()
     {
-        Cell.Collapsed = false;
-        Cell.spriteRenderer.sprite = Cell.initSprite;
-        Cell.tile = new Tile();
-        Cell.sockets = new List<Socket>();
-        Cell.tileSet = new TileSet();
-        Cell.backgrounds = Cell.WaveFunctionManager.backgrounds;
+        CellBase.Collapsed = false;
+        CellBase.spriteRenderer.sprite = CellBase.initSprite;
+        CellBase.Cell.tile = new Tile();
+        CellBase.sockets = new List<Socket>();
+        CellBase.Cell.tileSet = new TileSet(CellBase.WaveFunctionManager.backgrounds);
     }
 }

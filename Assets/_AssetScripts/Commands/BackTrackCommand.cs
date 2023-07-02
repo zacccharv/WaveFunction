@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class BackTrackCommand : TileCommand
 {
-    public override Cell Cell { get; set; }
+    public override CellBase CellBase { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
-    public BackTrackCommand (Cell cell, CommandManager commandManager, GridManager gridManager)
+    public BackTrackCommand(CellBase cell, CommandManager commandManager, GridManager gridManager)
     {
-        Cell = cell;
+        CellBase = cell;
         CommandManager = commandManager;
         GridManager = gridManager;
     }
 
     public override void Execute()
     {
-        Cell.cellFailIndex += 1;
+        CellBase.Cell.cellFailIndex += 1;
 
-        CommandManager.UndoTileChunk(Cell.cellFailIndex);
+        CommandManager.UndoTileChunk(CellBase.Cell.cellFailIndex);
         GridManager.waveIndex.Remove(GridManager.waveIndex[GridManager.waveIndex.Count - 1]);
 
         GridManager.waveIndex[GridManager.waveIndex.Count - 1].Collapsed = false;

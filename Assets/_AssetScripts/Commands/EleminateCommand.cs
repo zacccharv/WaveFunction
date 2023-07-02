@@ -4,36 +4,32 @@ using UnityEngine;
 
 public class EleminateCommand : TileCommand
 {
-    public override Cell Cell { get; set; }
+    public override CellBase CellBase { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
     List<List<Tile>> _neighbors = new List<List<Tile>>();
     List<List<Sprite>> _sprites = new List<List<Sprite>>();
     
-    public EleminateCommand(Cell target, CommandManager commandManager, GridManager gridManager)
+    public EleminateCommand(CellBase target, CommandManager commandManager, GridManager gridManager)
     {
-        Cell = target;
+        CellBase = target;
 
-        if (target.northNeighbor != null)
+        if (target.Cell.NeighborCells[0] != null)
         {
-            _neighbors.Add(target.northNeighbor.tileSet.Tiles);
-            _sprites.Add(target.northNeighbor.backgrounds);
+            _neighbors.Add(target.Cell.NeighborCells[0].tileSet.Tiles);
         }
-        if (target.eastNeighbor != null)
+        if (target.Cell.NeighborCells[1] != null)
         {
-            _neighbors.Add(target.eastNeighbor.tileSet.Tiles);
-            _sprites.Add(target.eastNeighbor.backgrounds);
+            _neighbors.Add(target.Cell.NeighborCells[1].tileSet.Tiles);
         }
-        if (target.southNeighbor != null)
+        if (target.Cell.NeighborCells[2] != null)
         {
-            _neighbors.Add(target.southNeighbor.tileSet.Tiles);
-            _sprites.Add(target.southNeighbor.backgrounds);
+            _neighbors.Add(target.Cell.NeighborCells[2].tileSet.Tiles);
         }
-        if (target.westNeighbor != null)
+        if (target.Cell.NeighborCells[3] != null)
         {
-            _neighbors.Add(target.westNeighbor.tileSet.Tiles);
-            _sprites.Add(target.westNeighbor.backgrounds);
+            _neighbors.Add(target.Cell.NeighborCells[3].tileSet.Tiles);;
         }
 
         CommandManager = commandManager;
@@ -42,31 +38,27 @@ public class EleminateCommand : TileCommand
 
     public override void Execute()
     {
-        Cell.RemoveNeighborsFromLists();
+        CellBase.Cell.RemoveNeighborsFromLists();
         CommandManager.PushTileCommand(this);
     }
 
     public override void Undo()
     {
-        if (Cell.northNeighbor != null)
+        if (CellBase.Cell.NeighborCells[0] != null)
         {
-            Cell.northNeighbor.tileSet.Tiles = _neighbors[0];            
-            Cell.northNeighbor.backgrounds = _sprites[0];
+            CellBase.Cell.NeighborCells[0].tileSet.Tiles = _neighbors[0];            
         }
-        if (Cell.eastNeighbor != null)
+        if (CellBase.Cell.NeighborCells[1] != null)
         {
-            Cell.eastNeighbor.tileSet.Tiles = _neighbors[1];            
-            Cell.eastNeighbor.backgrounds = _sprites[1];
+            CellBase.Cell.NeighborCells[1].tileSet.Tiles = _neighbors[1];      
         }
-        if (Cell.southNeighbor != null && _neighbors.Count > 2)
+        if (CellBase.Cell.NeighborCells[2] != null && _neighbors.Count > 2)
         {      
-            Cell.southNeighbor.tileSet.Tiles = _neighbors[2];            
-            Cell.southNeighbor.backgrounds = _sprites[2];
+            CellBase.Cell.NeighborCells[2].tileSet.Tiles = _neighbors[2];      
         }
-        if (Cell.westNeighbor != null && _neighbors.Count > 3)
+        if (CellBase.Cell.NeighborCells[3] != null && _neighbors.Count > 3)
         {
-            Cell.westNeighbor.tileSet.Tiles = _neighbors[3];            
-            Cell.westNeighbor.backgrounds = _sprites[3];
+            CellBase.Cell.NeighborCells[3].tileSet.Tiles = _neighbors[3];       
         }
     }
 }

@@ -8,19 +8,20 @@ public class WaveFunctionManager : MonoBehaviour
     public static Direction waveDirection = Direction.NONE;
 
     public GridManager gridManager;
-    public List<Cell> Cells = new List<Cell>();
-    public TileSet tileSet = new TileSet();
+    public List<CellBase> Cells = new List<CellBase>();
+    public TileSet tileSet;
     public List<Sprite> backgrounds = new List<Sprite>();
 
     void Awake()
     {
+        tileSet.Sprites = backgrounds;
         GetTiles();
     }
     public void GetTiles()
     {
         for (var i = 0; i < gridManager.transform.childCount; i++)
         {
-            Cells.Add(gridManager.transform.GetChild(i).gameObject.GetComponent<Cell>());
+            Cells.Add(gridManager.transform.GetChild(i).gameObject.GetComponent<CellBase>());
         }
     }
     public void Reroll()
@@ -28,12 +29,11 @@ public class WaveFunctionManager : MonoBehaviour
         foreach (var item in Cells)
         {
             item.Collapsed = false;
-            item.tile = new Tile();
+            item.Cell.tile = new Tile();
             item.sockets = new List<Socket>();
-            item.tileSet = new TileSet();
-            item.backgrounds = this.backgrounds;
+            item.Cell.tileSet = new TileSet(backgrounds);
 
-            item.spriteRenderer.sprite = backgrounds[0];
+            item.spriteRenderer.sprite = item.initSprite;
         }
     }
 }

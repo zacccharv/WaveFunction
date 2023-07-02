@@ -14,12 +14,7 @@ public class GridEditor : Editor
         {  
             GridManager createGrid = target as GridManager;
 
-            createGrid.offset = createGrid.tileWidth * (createGrid.columnNumber/2) - (createGrid.tileWidth/2);
-
-            if (createGrid.grid.Count > 0)
-            {
-                return;
-            }
+            // createGrid.offset = createGrid.tileWidth / ((createGrid.columnNumber - 1)/2) + ((createGrid.tileWidth - 1)/2);
 
             createGrid.DrawGrid();
         }

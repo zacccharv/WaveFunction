@@ -24,21 +24,30 @@ public class CellBase : MonoBehaviour, ICell
 
     void Awake()
     {
-        Cell = new Cell(this);
         spriteRenderer = GetComponent<SpriteRenderer>();
+        initSprite = spriteRenderer.sprite;
 
         for (var i = 0; i < 4; i++)
         {
             NeighborCells.Add(new Cell(this));
-        }             
+        }        
+
+        Cell = new Cell(this);
+
+        Cell.SetNeighbors();
+        SetTileStrings(Cell.tileSet.Tiles);
     }
     void OnEnable()
     {
-        tileCollapseEvent += Cell.RunCoroutine;
+        tileCollapseEvent += RunCoroutine;
     }
     void OnDisable()
     {
-        tileCollapseEvent -= Cell.RunCoroutine;
+        tileCollapseEvent -= RunCoroutine;
+    }
+    public void RunCoroutine()
+    {
+        //StartCoroutine(Cell.WaveFunction());
     }
     public void OnCollapsed()
     {

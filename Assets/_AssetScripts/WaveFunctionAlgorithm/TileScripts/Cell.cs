@@ -29,18 +29,10 @@ public class Cell : ICell
 
         tileSet.Sprites = WaveFunctionManager.backgrounds;
 
-        CellBase.SetTileStrings(tileSet.Tiles);
-
-        SetNeighbors();
-
         if (CellBase.startTile)
         {
             //CellBase.StartCoroutine(WaveFunction());
         }
-    }
-    public void RunCoroutine()
-    {
-        //CellBase.StartCoroutine(WaveFunction());
     }
 
     public IEnumerator WaveFunction()
@@ -83,7 +75,7 @@ public class Cell : ICell
 
         CellBase.SetTileStrings(tileSet.Tiles);
     }
-    void EntropyWave()
+    public void EntropyWave()
     {
         List<int> entropyAmounts = new List<int>();
 
@@ -136,7 +128,7 @@ public class Cell : ICell
 
         CollapsibleTile(NeighborCells[0], NeighborCells[1], NeighborCells[2], NeighborCells[3]).OnCollapsed();
     }
-    void SpiralWave()
+    public void SpiralWave()
         {
             WaveFunctionManager.waveDirection = tileDirection();
 
@@ -157,7 +149,7 @@ public class Cell : ICell
                 NeighborCells[3].OnCollapsed();
             }
         }
-    void WestToEastWave()
+    public void WestToEastWave()
     {
         if (!GridManager.grid[Index].Collapsed)
         {
@@ -210,17 +202,17 @@ public class Cell : ICell
         }
         return 0;
     }
-    void SetNeighbors()
+    public void SetNeighbors()
     {
         List<CellBase> grid = GridManager.grid;
         
         bool NorthNeighborExists()
         {
-            return Position.y < GridManager.rowNumber;
+            return Position.y < GridManager.rowNumber + 1;
         }
         bool EastNeighborExists()
         {
-            return Position.x < GridManager.columnNumber;
+            return Position.x < GridManager.columnNumber + 1;
         }
         bool SouthNeighborExists()
         {
@@ -233,19 +225,19 @@ public class Cell : ICell
 
         if (NorthNeighborExists())
         {
-            NeighborCells[0].CellBase = grid.Find(f => f.Position == new Vector2(f.Position.x, f.Position.y+1));
+            NeighborCells[0] = grid[Mathf.RoundToInt((Position.x + 0) + ((Position.y + 1) * 10))].Cell;
         }
         if (EastNeighborExists())
         {
-            NeighborCells[1].CellBase = grid.Find(f => f.Position == new Vector2(f.Position.x + 1, f.Position.y));            
+            NeighborCells[1] = grid[Mathf.RoundToInt((Position.x + 1) + (Position.y + 0) * 10)].Cell;            
         }
         if (SouthNeighborExists())
         {
-            NeighborCells[2].CellBase = grid.Find(f => f.Position == new Vector2(f.Position.x, f.Position.y - 1));            
+            NeighborCells[2] = grid[Mathf.RoundToInt((Position.x + 0) + ((Position.y - 1) * 10))].Cell;            
         }
         if (WestNeighborExists())
         {
-            NeighborCells[3].CellBase = grid.Find(f => f.Position == new Vector2(f.Position.x - 1, f.Position.y));
+            NeighborCells[3] = grid[Mathf.RoundToInt((Position.x - 1) + ((Position.y + 0) * 10))].Cell;
         }   
     }  
     public void RollForTile(int random)
@@ -299,4 +291,5 @@ public class Cell : ICell
     {
         CellBase.OnCollapsed();
     }
+    public override string ToString() => $"Cell => Index: {Index}, Position: {Position}";
 }

@@ -97,5 +97,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee2ef54d9476c7c48ac0a0da93bdb9ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Position>k__BackingField: {x: 0, y: 0}
   <Index>k__BackingField: 0
   <Collapsed>k__BackingField: 0
+  startTile: 0
+  sockets: 
+  tileStrings: []
+  initSprite: {fileID: 21300000, guid: 38b0b491d032e3f48803a2e461bc0eca, type: 3}
+  failed: 0
+  spriteRenderer: {fileID: 3002229342194127}

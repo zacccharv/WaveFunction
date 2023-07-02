@@ -14,7 +14,7 @@ public class WaveFunctionManager : MonoBehaviour
 
     void Awake()
     {
-        tileSet.Sprites = backgrounds;
+        tileSet = new TileSet(backgrounds);
         GetTiles();
     }
     public void GetTiles()

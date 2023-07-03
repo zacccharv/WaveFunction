@@ -6,6 +6,7 @@ public class CellBase : MonoBehaviour, ICell
 {
     public event System.Action tileCollapseEvent;
 
+    public CellBase previousCellBase = null;
     [field: SerializeField] public Cell Cell { get; set; }
     public GridManager GridManager { get { return FindAnyObjectByType<GridManager>(); } }
     public CommandManager CommandManager { get { return FindAnyObjectByType<CommandManager>(); } }
@@ -22,6 +23,8 @@ public class CellBase : MonoBehaviour, ICell
     public Sprite initSprite;
     public bool failed;
     public SpriteRenderer spriteRenderer;
+    public int funcRun;
+    public int writenum;
 
     void Awake()
     {
@@ -61,7 +64,6 @@ public class CellBase : MonoBehaviour, ICell
     
     public IEnumerator WaveFunction()
     {
-        
         if (GridManager.waveIndex.Count > (GridManager.DIM * GridManager.DIM) - 1)
         {
             Debug.Log("WaveFunction Cancelled");
@@ -84,47 +86,28 @@ public class CellBase : MonoBehaviour, ICell
 
             // SpiralWave();
 
-            Cell.EntropyWave(NeighborCells);
-        }
-
-        if (this.sockets.Count == 0)
-        {
-            Debug.Log($"Uncollapsed at Index {Position} but shouldn't have been. After Entropy");
+            Cell.EntropyWave(NeighborCells);        
+            
+            CreateTileStrings(this.Cell.tileSet.Tiles);        
+            yield return null;
         }
 
         Collapsed = true;
-        
-
-        CreateTileStrings(Cell.tileSet.Tiles);        
-        yield return null;
-
-        // SetTileStrings(tileStrings);
-        // yield return null;
+        yield return null;        
     }
     public void CreateTileStrings(List<Tile> tiles)
     {
-        foreach (var item in tiles)
-        {
-            tileStrings.Add(item.ToString());
-        }
-    }
-    public void SetTileStrings(List<string> tiles)
-    {
-        List<string> m = new List<string>();
-
-        foreach (var item in tiles)
-        {
-            m.Add(item);
-        }
-
         tileStrings.Clear();
 
-        m.Reverse();
-
-        foreach (var item in m)
-        {
-            tileStrings.Add(item);
+        foreach (var item in tiles)
+        {   
+            writenum++;
+            if (writenum < 17 && tiles.Count < 17)
+            {
+               tileStrings.Add(item.ToString()); 
+            }
         }
+        
     }
 }
 

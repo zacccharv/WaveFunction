@@ -47,7 +47,7 @@ public class TileSet
             }
             else if (i == 15)
             { 
-                Tiles[i] = new Tile( Socket.line, Socket.line, Socket.line, Socket.line, i);
+                Tiles[i] = new Tile( Socket.line, Socket.line, Socket.line, Socket.line, i, sprites[i]);
             }
         }
     } 

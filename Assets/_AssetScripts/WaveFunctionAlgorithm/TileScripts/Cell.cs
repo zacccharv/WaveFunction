@@ -21,81 +21,87 @@ public class Cell : ICell
     public Tile tile = new Tile();
     public TileSet tileSet;
     int NE = 1; int SE = 2; int SW = 3; int NW = 4;
+    private int currentTileIndex;
 
     public Cell(CellBase cellBase)
     {
         CellBase = cellBase;
-
         tileSet = new TileSet(WaveFunctionManager.backgrounds);
     }
 
-
     public void EntropyWave(List<CellBase> cells)
     {
+        List<Cell> localCells = new List<Cell>();
+
         foreach (var item in cells)
         {
             if (item != null)
             {
-                foreach (var newItem in item.Cell.tileSet.Tiles)
-                {
-                    Debug.Log(newItem.ToString());
-                }
-                
+                localCells.Add(item.Cell);
+            }
+            else
+            {
+                localCells.Add(null);
             }
         }
-        
-        // TODO FIX ME!!!!!!!!!!!
-        // List<int> entropyAmounts = new List<int>();
 
-        // void GetEntropy(CellBase north = null, CellBase east = null, CellBase south = null, CellBase west = null)
-        // {
-        //     Cell[] tileSet = { north.Cell, east.Cell, south.Cell, west.Cell };
+        List<int> entropyAmounts = new List<int>();
 
-        //     for (int i = 0; i < tileSet.Length; i++)
-        //     {
-        //         if (tileSet[i] != null && !tileSet[i].Collapsed) entropyAmounts.Add(tileSet[i].tileSet.Tiles.Count);
-        //     }
-        // }
-        // GetEntropy(cells[0], cells[1], cells[2], cells[3]);
+        void GetEntropy(Cell north = null, Cell east = null, Cell south = null, Cell west = null)
+        {
+            Cell[] tileSet = { north, east, south, west };
 
-        // if (entropyAmounts.Count == 0)
-        // {
-        //     BackTrackCommand backTrackCommand = new BackTrackCommand(CellBase, CommandManager, GridManager);
-        //     backTrackCommand.Execute();
-        // }
+            for (int i = 0; i < tileSet.Length; i++)
+            {
+                if (tileSet[i] != null && !tileSet[i].Collapsed) { entropyAmounts.Add(tileSet[i].tileSet.Tiles.Count); }
+            }
+        }
+        GetEntropy(localCells[0], localCells[1], localCells[2], localCells[3]);
 
-        //int smallestEntropy = Mathf.Min(entropyAmounts.ToArray());
+        if (entropyAmounts.Count == 0)
+        {
+            CommandManager.UndoLastTileCommand();
+            CommandManager.UndoLastTileCommand();
 
-
-        // Cell CollapsibleTile(Cell north = null, Cell east = null, Cell south = null, Cell west = null)
-        // {
-        //     Cell[] tileSet = { north, east, south, west };
-        //     List<Cell> cells = new List<Cell>();
-
-        //     for (int i = 0; i < tileSet.Length; i++)
-        //     {
-        //         if (tileSet[i] != null && tileSet[i].tileSet.Tiles.Count == smallestEntropy && !tileSet[i].Collapsed)
-        //         {
-        //             cells.Add(tileSet[i]);
-        //         }
-        //     }
-        //     if (cells.Count == 0)
-        //     {
-        //         return null;
-        //     }
-
-        //     int smallest = new System.Random().Next(0, cells.Count);
+            // collapse previous
+            // CellBase.OnCollapsed();
             
-        //     return cells[smallest];
-        // }
+            return;
+        }
 
-        // if (CollapsibleTile(CellBase.NeighborCells[0].Cell, CellBase.NeighborCells[1].Cell, CellBase.NeighborCells[2].Cell, CellBase.NeighborCells[3].Cell) == null)
-        // {
-        //     Debug.Log(this.Position);
-        //     return;
-        // }
+        int smallestEntropy = Mathf.Min(entropyAmounts.ToArray());
 
-        // CollapsibleTile(NeighborCells[0].Cell, NeighborCells[1].Cell, NeighborCells[2].Cell, NeighborCells[3].Cell).CellBase.OnCollapsed();
+        Cell CollapsibleTile(Cell north = null, Cell east = null, Cell south = null, Cell west = null)
+        {
+            Cell[] tileSet = { north, east, south, west };
+            List<Cell> cells = new List<Cell>();
+
+            for (int i = 0; i < tileSet.Length; i++)
+            {
+                if (tileSet[i] != null && tileSet[i].tileSet.Tiles.Count == smallestEntropy && !tileSet[i].Collapsed)
+                {
+                    cells.Add(tileSet[i]);
+                }
+            }
+            if (cells.Count == 0)
+            {
+                return null;
+            }
+
+            int smallest = new System.Random().Next(0, cells.Count);
+            
+            return cells[smallest];
+        }
+
+        if (CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]) == null)
+        {
+            return;
+        }
+
+        // Debug.Log(CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]).ToString());
+
+        CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]).CellBase.previousCellBase = this.CellBase;
+        CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]).CellBase.OnCollapsed();
     }
     public void SpiralWave()
         {
@@ -138,7 +144,6 @@ public class Cell : ICell
 
         // North East or South
         else if ((GetCornerContacts() == SE ^ GetContacts()[2]) && !GetContacts()[3] ) return Direction.WEST;
-        Debug.Log(string.Join(", ", GetContacts().ToArray()));
 
         return Direction.NONE;
     }
@@ -236,47 +241,79 @@ public class Cell : ICell
         CellBase.spriteRenderer.sprite = tile.SPRITE;
 
         CellBase.sockets = new List<Socket>() { tile.NORTH, tile.EAST, tile.SOUTH, tile.WEST };
+        currentTileIndex = random;
         return;
     }
     public void RemoveNeighborsFromLists()
     {
-        for (var i = 0; i < 4; i++)
-        {
-            NeighborSetComparer(i);
-        }
+        List<string> neighborCells = new List<string>() { "", "", "", ""};
 
-        void NeighborSetComparer(int neighborSetIndex)
+        for (int i = 0; i < neighborCells.Count; i++)
         {
-            if (NeighborCells[neighborSetIndex] != null)
+            if (NeighborCells[i] != null)
             {
-                List<Tile> neighbors = new List<Tile>();
-
-                TilesetComparer(neighborSetIndex, neighbors);
-
-                NeighborCells[neighborSetIndex].Cell.tileSet.Tiles = neighbors;
-                //NeighborCells[neighborSetIndex].SetTileStrings(neighbors);
+                neighborCells[i] = $"NeighborCells[{i}]";
             }
         }
-        void TilesetComparer(int neighborSetIndex, List<Tile> neighbors)
-        {
-            for (int tileSetTileIndex = 0; tileSetTileIndex < NeighborCells[neighborSetIndex].Cell.tileSet.Tiles.Count; tileSetTileIndex++)
-            {
-                List<Socket> tileSetTileSockets = new List<Socket>() { NeighborCells[neighborSetIndex].Cell.tileSet.Tiles[tileSetTileIndex].NORTH, NeighborCells[neighborSetIndex].Cell.tileSet.Tiles[tileSetTileIndex].EAST, NeighborCells[neighborSetIndex].Cell.tileSet.Tiles[tileSetTileIndex].SOUTH, NeighborCells[neighborSetIndex].Cell.tileSet.Tiles[tileSetTileIndex].WEST };
 
-                SocketComparer(neighborSetIndex, neighbors, tileSetTileIndex, tileSetTileSockets);
-            }
-        }
-        void SocketComparer(int neighborSetIndex, List<Tile> neighbors, int tileSetTileIndex, List<Socket> tileSetTileSockets)
+        if (neighborCells[0] != "") 
         {
-            for (var socketIndex = 0; socketIndex < 4; socketIndex++)
-            {
-                if (tileSetTileSockets[socketIndex] == CellBase.sockets[socketIndex])
+            List<Tile> neighbors = new List<Tile>();
+
+            for (int i = 0; i < NeighborCells[0].Cell.tileSet.Tiles.Count; i++)
+            {   
+                if (tile.NORTH == NeighborCells[0].Cell.tileSet.Tiles[i].SOUTH)
                 {
-                    neighbors.Add(NeighborCells[neighborSetIndex].Cell.tileSet.Tiles[socketIndex]);
+                    neighbors.Add(NeighborCells[0].Cell.tileSet.Tiles[i]);
                 }
             }
+            NeighborCells[0].Cell.tileSet.Tiles = neighbors;
         }
 
+        if (neighborCells[1] != "")
+        {
+            List<Tile> neighbors = new List<Tile>();
+
+            for (int i = 0; i < NeighborCells[1].Cell.tileSet.Tiles.Count; i++)
+            {
+                if (NeighborCells[1].Cell.tileSet.Tiles[i].WEST == tile.EAST)
+                {
+                    neighbors.Add(NeighborCells[1].Cell.tileSet.Tiles[i]);
+                }
+            }
+            NeighborCells[1].Cell.tileSet.Tiles = neighbors;
+        }
+
+        if (neighborCells[2] != "")
+        {
+            List<Tile> neighbors = new List<Tile>(16);
+
+
+            for (int i = 0; i < NeighborCells[2].Cell.tileSet.Tiles.Count; i++)
+            {
+                if (NeighborCells[2].Cell.tileSet.Tiles[i].NORTH == tile.SOUTH)
+                {
+                    neighbors.Add(NeighborCells[2].Cell.tileSet.Tiles[i]);
+                }
+            }
+            NeighborCells[2].Cell.tileSet.Tiles = neighbors;
+        }
+
+        if (neighborCells[3] != "")
+        {
+            List<Tile> neighbors = new List<Tile>();
+
+            for (int i = 0; i < NeighborCells[3].Cell.tileSet.Tiles.Count; i++)
+            {
+                if (NeighborCells[3].Cell.tileSet.Tiles[i].EAST == tile.WEST)
+                {
+                    neighbors.Add(NeighborCells[3].Cell.tileSet.Tiles[i]);
+                }
+            }
+            NeighborCells[3].Cell.tileSet.Tiles = neighbors;
+        }
+
+        tileSet.Tiles.RemoveAt(currentTileIndex);
     }
     // public void OnCollapsed()
     // {

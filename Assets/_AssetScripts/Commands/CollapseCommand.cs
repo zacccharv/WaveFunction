@@ -29,11 +29,6 @@ public class CollapseCommand : TileCommand
             GridManager.waveIndex.Add(CellBase);
 
             if (CellBase.sockets.Count == 0)
-            {
-                Debug.Log($"{CellBase.Index} Has Collapsed with no sockets");
-            }
-
-            if (CellBase.sockets.Count == 0)
             { 
                 CellBase.Collapsed = true; 
             }

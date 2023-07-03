@@ -14,9 +14,11 @@ public class GridEditor : Editor
         {  
             GridManager createGrid = target as GridManager;
 
-            // createGrid.offset = createGrid.tileWidth / ((createGrid.columnNumber - 1)/2) + ((createGrid.tileWidth - 1)/2);
-
-            createGrid.DrawGrid();
+            if (createGrid.grid.Count < 1)
+            {
+                createGrid.DrawGrid();
+            }
+            
         }
         if (GUILayout.Button("Reset") && !Application.isPlaying)
         {
@@ -24,10 +26,11 @@ public class GridEditor : Editor
 
             foreach (var item in createGrid.grid)
             {
-                DestroyImmediate(item.gameObject);
+                if (item != null)
+                {
+                    DestroyImmediate(item.gameObject);
+                }
             }
-
-            createGrid.currentIndex = 0;
             
             createGrid.grid.Clear();
         }

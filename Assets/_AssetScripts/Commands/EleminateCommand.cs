@@ -15,21 +15,21 @@ public class EleminateCommand : TileCommand
     {
         CellBase = target;
 
-        if (target.Cell.NeighborCells[0] != null)
+        if (target.NeighborCells[0] != null)
         {
-            _neighbors.Add(target.Cell.NeighborCells[0].tileSet.Tiles);
+            _neighbors.Add(target.NeighborCells[0].Cell.tileSet.Tiles);
         }
-        if (target.Cell.NeighborCells[1] != null)
+        if (target.NeighborCells[1] != null)
         {
-            _neighbors.Add(target.Cell.NeighborCells[1].tileSet.Tiles);
+            _neighbors.Add(target.NeighborCells[1].Cell.tileSet.Tiles);
         }
-        if (target.Cell.NeighborCells[2] != null)
+        if (target.NeighborCells[2] != null)
         {
-            _neighbors.Add(target.Cell.NeighborCells[2].tileSet.Tiles);
+            _neighbors.Add(target.NeighborCells[2].Cell.tileSet.Tiles);
         }
-        if (target.Cell.NeighborCells[3] != null)
+        if (target.NeighborCells[3] != null)
         {
-            _neighbors.Add(target.Cell.NeighborCells[3].tileSet.Tiles);;
+            _neighbors.Add(target.NeighborCells[3].Cell.tileSet.Tiles);;
         }
 
         CommandManager = commandManager;
@@ -44,21 +44,21 @@ public class EleminateCommand : TileCommand
 
     public override void Undo()
     {
-        if (CellBase.Cell.NeighborCells[0] != null)
+        if (CellBase.NeighborCells[0] != null)
         {
-            CellBase.Cell.NeighborCells[0].tileSet.Tiles = _neighbors[0];            
+            CellBase.NeighborCells[0].Cell.tileSet.Tiles = _neighbors[0];            
         }
-        if (CellBase.Cell.NeighborCells[1] != null)
+        if (CellBase.NeighborCells[1] != null)
         {
-            CellBase.Cell.NeighborCells[1].tileSet.Tiles = _neighbors[1];      
+            CellBase.NeighborCells[1].Cell.tileSet.Tiles = _neighbors[1];      
         }
-        if (CellBase.Cell.NeighborCells[2] != null && _neighbors.Count > 2)
+        if (CellBase.NeighborCells[2] != null && _neighbors.Count > 2)
         {      
-            CellBase.Cell.NeighborCells[2].tileSet.Tiles = _neighbors[2];      
+            CellBase.NeighborCells[2].Cell.tileSet.Tiles = _neighbors[2];      
         }
-        if (CellBase.Cell.NeighborCells[3] != null && _neighbors.Count > 3)
+        if (CellBase.NeighborCells[3] != null && _neighbors.Count > 3)
         {
-            CellBase.Cell.NeighborCells[3].tileSet.Tiles = _neighbors[3];       
+            CellBase.NeighborCells[3].Cell.tileSet.Tiles = _neighbors[3];       
         }
     }
 }

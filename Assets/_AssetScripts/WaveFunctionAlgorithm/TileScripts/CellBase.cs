@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ public class CellBase : MonoBehaviour, ICell
     [field: SerializeField] public Vector2 Position { get; set; } = new Vector2(0, 0);
     [field: SerializeField] public int Index { get; set; } = 0;
     [field: SerializeField] public bool Collapsed { get; set; }
-    public List<Cell> NeighborCells = new List<Cell>();
+    public List<CellBase> NeighborCells = new List<CellBase>();
     
     public bool startTile;
     public List<Socket> sockets = new List<Socket>();
@@ -26,16 +27,20 @@ public class CellBase : MonoBehaviour, ICell
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         initSprite = spriteRenderer.sprite;
-
+        
+        Cell = new Cell(this);
+        
         for (var i = 0; i < 4; i++)
         {
-            NeighborCells.Add(new Cell(this));
-        }        
-
-        Cell = new Cell(this);
+            NeighborCells.Add(this);
+        }
 
         Cell.SetNeighbors();
-        SetTileStrings(Cell.tileSet.Tiles);
+        
+        if (Index == 1)
+        {
+            RunCoroutine();
+        }
     }
     void OnEnable()
     {
@@ -47,19 +52,78 @@ public class CellBase : MonoBehaviour, ICell
     }
     public void RunCoroutine()
     {
-        //StartCoroutine(Cell.WaveFunction());
+        StartCoroutine(WaveFunction());
     }
     public void OnCollapsed()
     {
         tileCollapseEvent?.Invoke();
     }
-    public void SetTileStrings(List<Tile> tiles)
+    
+    public IEnumerator WaveFunction()
     {
-        tileStrings.Clear();
+        
+        if (GridManager.waveIndex.Count > (GridManager.DIM * GridManager.DIM) - 1)
+        {
+            Debug.Log("WaveFunction Cancelled");
+            StopAllCoroutines();
+        } 
 
+        if (!Collapsed)
+        {
+            CollapseCommand collapse = new CollapseCommand(this, CommandManager, GridManager);
+            collapse.Execute();
+
+            yield return null;
+
+            EleminateCommand eleminate = new EleminateCommand(this, CommandManager, GridManager);
+            eleminate.Execute();
+
+            yield return null;
+
+            // WestToEastWave();
+
+            // SpiralWave();
+
+            Cell.EntropyWave(NeighborCells);
+        }
+
+        if (this.sockets.Count == 0)
+        {
+            Debug.Log($"Uncollapsed at Index {Position} but shouldn't have been. After Entropy");
+        }
+
+        Collapsed = true;
+        
+
+        CreateTileStrings(Cell.tileSet.Tiles);        
+        yield return null;
+
+        // SetTileStrings(tileStrings);
+        // yield return null;
+    }
+    public void CreateTileStrings(List<Tile> tiles)
+    {
         foreach (var item in tiles)
         {
             tileStrings.Add(item.ToString());
+        }
+    }
+    public void SetTileStrings(List<string> tiles)
+    {
+        List<string> m = new List<string>();
+
+        foreach (var item in tiles)
+        {
+            m.Add(item);
+        }
+
+        tileStrings.Clear();
+
+        m.Reverse();
+
+        foreach (var item in m)
+        {
+            tileStrings.Add(item);
         }
     }
 }
@@ -72,5 +136,4 @@ internal interface ICell
     public Vector2 Position { get; set; }
     public int Index { get; set; }
     public bool Collapsed { get; set; }
-    public void OnCollapsed() {} 
 }

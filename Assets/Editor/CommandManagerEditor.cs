@@ -12,7 +12,6 @@ public class CommandManagerEditor : Editor
             CommandManager manager = target as CommandManager;
 
             manager.UndoLastTileCommand();
-            manager.UndoLastTileCommand();
         }
     }
 }

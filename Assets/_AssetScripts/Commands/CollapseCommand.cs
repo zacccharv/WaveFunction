@@ -4,20 +4,23 @@ using UnityEngine;
 
 public class CollapseCommand : TileCommand
 {
+    private List<Tile> localTiles;
+    private int randomNext;
+
     public override CellBase CellBase { get; set; }
     public override CommandManager CommandManager { get; set; }
     public override GridManager GridManager { get; set; }
 
-    public CollapseCommand(CellBase target, CommandManager commandManager, GridManager gridManager)
+    public CollapseCommand(CellBase cellBase, CommandManager commandManager, GridManager gridManager)
     {
-        CellBase = target;
+        CellBase = cellBase;
         CommandManager = commandManager;
         GridManager = gridManager;
     }
 
     public override void Execute()
     {   
-        int randomNext = 0;
+        randomNext = 0;
         System.Random random = new System.Random();
 
         if (CellBase.Cell.tileSet.Tiles.Count > 0)
@@ -31,31 +34,29 @@ public class CollapseCommand : TileCommand
             if (CellBase.sockets.Count == 0)
             { 
                 CellBase.Collapsed = true; 
+                Debug.Log($"{CellBase.Index}.Collapsed = {CellBase.Collapsed}");
             }
 
             CommandManager.PushTileCommand(this);
         }
-        else
-        {
-            CellBase.failed = true;
+        // else
+        // {
+        //     CellBase.failed = true;
 
-            BackTrackCommand backTrackCommand = new BackTrackCommand(CellBase ,CommandManager, GridManager);
+        //     BackTrackCommand backTrackCommand = new BackTrackCommand(CellBase ,CommandManager, GridManager);
 
-            backTrackCommand.Execute();
+        //     backTrackCommand.Execute();
 
-            if (GridManager.waveIndex.Count == GridManager.DIM * GridManager.DIM)
-            {
-                CellBase.StopAllCoroutines();
-            }
-        }
+        //     if (GridManager.waveIndex.Count == GridManager.DIM * GridManager.DIM)
+        //     {
+        //         CellBase.StopAllCoroutines();
+        //     }
+        // }
     }
-
     public override void Undo()
-    {
-        CellBase.Collapsed = false;
+    {  
         CellBase.spriteRenderer.sprite = CellBase.initSprite;
         CellBase.Cell.tile = new Tile();
         CellBase.sockets = new List<Socket>();
-        CellBase.Cell.tileSet = new TileSet(CellBase.WaveFunctionManager.backgrounds);
     }
 }

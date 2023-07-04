@@ -21,23 +21,27 @@ public class Cell : ICell
     public Tile tile = new Tile();
     public TileSet tileSet;
     int NE = 1; int SE = 2; int SW = 3; int NW = 4;
-    private int currentTileIndex;
+    public int currentTileIndex;
+    public int whichNeighborAmI;
+    public TileSet originalTileSet;
 
     public Cell(CellBase cellBase)
     {
         CellBase = cellBase;
         tileSet = new TileSet(WaveFunctionManager.backgrounds);
+        originalTileSet = new TileSet(WaveFunctionManager.backgrounds);
     }
 
-    public void EntropyWave(List<CellBase> cells)
+    // NEXT TILE TO COLLAPSE
+    public Cell EntropyWave(List<CellBase> cells)
     {
         List<Cell> localCells = new List<Cell>();
 
-        foreach (var item in cells)
+        for (var i = 0; i < cells.Count ; i++)
         {
-            if (item != null)
+            if (cells[i] != null && CellBase.allowedNeighbors[i])
             {
-                localCells.Add(item.Cell);
+                localCells.Add(cells[i].Cell);
             }
             else
             {
@@ -47,61 +51,62 @@ public class Cell : ICell
 
         List<int> entropyAmounts = new List<int>();
 
+        // generate list of neighbor tiles tile count
         void GetEntropy(Cell north = null, Cell east = null, Cell south = null, Cell west = null)
         {
-            Cell[] tileSet = { north, east, south, west };
+            Cell[] tiles = { north, east, south, west };
 
-            for (int i = 0; i < tileSet.Length; i++)
+            for (int i = 0; i < tiles.Length; i++)
             {
-                if (tileSet[i] != null && !tileSet[i].Collapsed) { entropyAmounts.Add(tileSet[i].tileSet.Tiles.Count); }
+                if (tiles[i] != null && !tiles[i].Collapsed && CellBase.allowedNeighbors[i] == true) { entropyAmounts.Add(tiles[i].tileSet.Tiles.Count); }
+                if (tiles[i] == null || tiles[i].Collapsed) { CellBase.allowedNeighbors[i] = false; }
             }
         }
         GetEntropy(localCells[0], localCells[1], localCells[2], localCells[3]);
 
-        if (entropyAmounts.Count == 0)
-        {
-            CommandManager.UndoLastTileCommand();
-            CommandManager.UndoLastTileCommand();
-
-            // collapse previous
-            // CellBase.OnCollapsed();
-            
-            return;
-        }
-
         int smallestEntropy = Mathf.Min(entropyAmounts.ToArray());
 
+        // if all neighbors tiles depleted
+        if (entropyAmounts.Count == 0 && CellBase.previousCellBase != null)
+        {
+            Debug.Log($"All neighbors depleted @ {Index}");
+            return null;
+        }
+
+        // returns next tile
         Cell CollapsibleTile(Cell north = null, Cell east = null, Cell south = null, Cell west = null)
         {
-            Cell[] tileSet = { north, east, south, west };
+            Cell[] tiles = { north, east, south, west };
             List<Cell> cells = new List<Cell>();
 
-            for (int i = 0; i < tileSet.Length; i++)
+            for (int i = 0; i < tiles.Length; i++)
             {
-                if (tileSet[i] != null && tileSet[i].tileSet.Tiles.Count == smallestEntropy && !tileSet[i].Collapsed)
+                if (tiles[i] != null && tiles[i].tileSet.Tiles.Count == smallestEntropy && !tiles[i].Collapsed)
                 {
-                    cells.Add(tileSet[i]);
+                    cells.Add(tiles[i]);
                 }
             }
+
             if (cells.Count == 0)
             {
                 return null;
             }
 
             int smallest = new System.Random().Next(0, cells.Count);
-            
+
             return cells[smallest];
         }
 
+        // if all neighbors collapsed
         if (CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]) == null)
         {
-            return;
+            Debug.Log($"All neighbors collapsed @ {Index}");
+            return null;
         }
 
-        // Debug.Log(CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]).ToString());
+        Cell result = CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]);
 
-        CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]).CellBase.previousCellBase = this.CellBase;
-        CollapsibleTile(localCells[0], localCells[1], localCells[2], localCells[3]).CellBase.OnCollapsed();
+        return result;
     }
     public void SpiralWave()
         {
@@ -237,12 +242,11 @@ public class Cell : ICell
     }  
     public void RollForTile(int random)
     {
+        Debug.Log($"rolled @ {Index}");
         tile = tileSet.Tiles[random];
         CellBase.spriteRenderer.sprite = tile.SPRITE;
 
         CellBase.sockets = new List<Socket>() { tile.NORTH, tile.EAST, tile.SOUTH, tile.WEST };
-        currentTileIndex = random;
-        return;
     }
     public void RemoveNeighborsFromLists()
     {
@@ -259,66 +263,81 @@ public class Cell : ICell
         if (neighborCells[0] != "") 
         {
             List<Tile> neighbors = new List<Tile>();
+            List<Tile> originalNeighbors = new List<Tile>();
 
             for (int i = 0; i < NeighborCells[0].Cell.tileSet.Tiles.Count; i++)
             {   
+                originalNeighbors.Add(NeighborCells[0].Cell.tileSet.Tiles[i]);
+
                 if (tile.NORTH == NeighborCells[0].Cell.tileSet.Tiles[i].SOUTH)
                 {
                     neighbors.Add(NeighborCells[0].Cell.tileSet.Tiles[i]);
                 }
             }
+            
             NeighborCells[0].Cell.tileSet.Tiles = neighbors;
+            NeighborCells[0].CreateTileStrings(neighbors);
         }
 
         if (neighborCells[1] != "")
         {
             List<Tile> neighbors = new List<Tile>();
+            List<Tile> originalNeighbors = new List<Tile>();
 
             for (int i = 0; i < NeighborCells[1].Cell.tileSet.Tiles.Count; i++)
             {
+                originalNeighbors.Add(NeighborCells[1].Cell.tileSet.Tiles[i]);
+                            
                 if (NeighborCells[1].Cell.tileSet.Tiles[i].WEST == tile.EAST)
                 {
+                    NeighborCells[1].Cell.originalTileSet.Tiles = originalNeighbors; 
                     neighbors.Add(NeighborCells[1].Cell.tileSet.Tiles[i]);
                 }
             }
             NeighborCells[1].Cell.tileSet.Tiles = neighbors;
+            NeighborCells[1].CreateTileStrings(neighbors);
         }
 
         if (neighborCells[2] != "")
         {
-            List<Tile> neighbors = new List<Tile>(16);
-
+            List<Tile> neighbors = new List<Tile>();
+            List<Tile> originalNeighbors = new List<Tile>();
 
             for (int i = 0; i < NeighborCells[2].Cell.tileSet.Tiles.Count; i++)
             {
+                originalNeighbors.Add(NeighborCells[2].Cell.tileSet.Tiles[i]);                
                 if (NeighborCells[2].Cell.tileSet.Tiles[i].NORTH == tile.SOUTH)
                 {
                     neighbors.Add(NeighborCells[2].Cell.tileSet.Tiles[i]);
+            
                 }
             }
+
             NeighborCells[2].Cell.tileSet.Tiles = neighbors;
+            NeighborCells[2].CreateTileStrings(neighbors);
         }
 
         if (neighborCells[3] != "")
         {
             List<Tile> neighbors = new List<Tile>();
+            List<Tile> originalNeighbors = new List<Tile>();
+                
 
             for (int i = 0; i < NeighborCells[3].Cell.tileSet.Tiles.Count; i++)
             {
+                NeighborCells[3].Cell.originalTileSet = NeighborCells[3].Cell.tileSet;
                 if (NeighborCells[3].Cell.tileSet.Tiles[i].EAST == tile.WEST)
                 {
+                    originalNeighbors.Add(NeighborCells[3].Cell.tileSet.Tiles[i]);      
                     neighbors.Add(NeighborCells[3].Cell.tileSet.Tiles[i]);
+                    NeighborCells[3].Cell.originalTileSet.Tiles = originalNeighbors; 
                 }
             }
-            NeighborCells[3].Cell.tileSet.Tiles = neighbors;
-        }
 
-        tileSet.Tiles.RemoveAt(currentTileIndex);
+            NeighborCells[3].Cell.tileSet.Tiles = neighbors;
+            NeighborCells[3].CreateTileStrings(neighbors);
+        }
     }
-    // public void OnCollapsed()
-    // {
-    //     CellBase.OnCollapsed();
-    // }
 
     public override string ToString() => $"Cell => Index: {Index}, Position: {Position}";
 }

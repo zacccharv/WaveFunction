@@ -16,15 +16,13 @@ public class CellBase : MonoBehaviour, ICell
     [field: SerializeField] public int Index { get; set; } = 0;
     [field: SerializeField] public bool Collapsed { get; set; }
     public List<CellBase> NeighborCells = new List<CellBase>();
-    
+    public bool[] allowedNeighbors = new bool[] { true, true, true, true };
     public bool startTile;
     public List<Socket> sockets = new List<Socket>();
     public List<string> tileStrings = new List<string>();
     public Sprite initSprite;
     public bool failed;
     public SpriteRenderer spriteRenderer;
-    public int funcRun;
-    public int writenum;
 
     void Awake()
     {
@@ -39,7 +37,8 @@ public class CellBase : MonoBehaviour, ICell
         }
 
         Cell.SetNeighbors();
-        
+        CreateTileStrings(Cell.tileSet.Tiles);
+
         if (Index == 1)
         {
             RunCoroutine();
@@ -74,8 +73,8 @@ public class CellBase : MonoBehaviour, ICell
         {
             CollapseCommand collapse = new CollapseCommand(this, CommandManager, GridManager);
             collapse.Execute();
-
             yield return null;
+
 
             EleminateCommand eleminate = new EleminateCommand(this, CommandManager, GridManager);
             eleminate.Execute();
@@ -86,9 +85,30 @@ public class CellBase : MonoBehaviour, ICell
 
             // SpiralWave();
 
-            Cell.EntropyWave(NeighborCells);        
+            Cell nextTile = Cell.EntropyWave(NeighborCells);
             
-            CreateTileStrings(this.Cell.tileSet.Tiles);        
+            CreateTileStrings(this.Cell.tileSet.Tiles);
+
+            if (nextTile != null)
+            {
+                nextTile.CellBase.previousCellBase = this;
+                nextTile.CellBase.OnCollapsed();
+            }
+            else if (nextTile == null)
+            {
+                Debug.Log($"this Cell = {this.Cell.ToString()}, previous Cell = {previousCellBase.Cell.ToString()} previous Collapsed = {previousCellBase.Cell.Collapsed}");
+
+                for (var i = 0; i < 4; i++)
+                {
+                    CommandManager.UndoLastTileCommand();
+                    yield return null;
+                }
+
+                allowedNeighbors = new bool[] { true, true, true, true };
+                previousCellBase.allowedNeighbors[Cell.whichNeighborAmI] = false;
+                previousCellBase.OnCollapsed();
+            }
+
             yield return null;
         }
 
@@ -101,8 +121,7 @@ public class CellBase : MonoBehaviour, ICell
 
         foreach (var item in tiles)
         {   
-            writenum++;
-            if (writenum < 17 && tiles.Count < 17)
+            if (tiles.Count < 17)
             {
                tileStrings.Add(item.ToString()); 
             }

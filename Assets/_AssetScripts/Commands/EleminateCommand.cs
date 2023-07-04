@@ -18,40 +18,40 @@ public class EleminateCommand : TileCommand
 
         localCells = new List<Cell>();
 
-        foreach (var item in target.NeighborCells)
-        {
-            if (item != null)
-            {
-                localCells.Add(item.Cell);
-            }
-            else
-            {
-                localCells.Add(null);
-            }
-        }
-
-        if (localCells[0] != null)
-        {
-            localCells[0].tileSet.Tiles = target.NeighborCells[0].Cell.tileSet.Tiles;
-        }
-        if (localCells[1] != null)
-        {
-            localCells[1].tileSet.Tiles = target.NeighborCells[1].Cell.tileSet.Tiles;
-        }
-        if (localCells[2] != null)
-        {
-            localCells[2].tileSet.Tiles = target.NeighborCells[2].Cell.tileSet.Tiles;
-        }
-        if (localCells[3] != null)
-        {
-            localCells[3].tileSet.Tiles = target.NeighborCells[3].Cell.tileSet.Tiles;
-        }
-
         CommandManager = commandManager;
     }
 
     public override void Execute()
     {
+        foreach (var item in CellBase.NeighborCells)
+        {
+            if (item != null)
+            {
+                _neighbors.Add(new List<Tile>());
+            }
+            else
+            {
+                _neighbors.Add(null);
+            }
+        }
+
+        if (_neighbors[0] != null)
+        {
+            _neighbors[0] = CellBase.NeighborCells[0].Cell.tileSet.Tiles;
+        }
+        if (_neighbors[1] != null)
+        {
+            _neighbors[1] = CellBase.NeighborCells[1].Cell.tileSet.Tiles;
+        }
+        if (_neighbors[2] != null)
+        {
+            _neighbors[2] = CellBase.NeighborCells[2].Cell.tileSet.Tiles;
+        }
+        if (_neighbors[3] != null)
+        {
+            _neighbors[3] = CellBase.NeighborCells[3].Cell.tileSet.Tiles;
+        }
+
         CellBase.Cell.RemoveNeighborsFromLists();
 
         CommandManager.PushTileCommand(this);
@@ -61,12 +61,16 @@ public class EleminateCommand : TileCommand
     {
         for (var i = 0; i < 4; i++)
         {
-            if (localCells[i] != null)
+            if (_neighbors[i] != null)
             {
-                CellBase.NeighborCells[i].Cell.tileSet.Tiles = localCells[i].tileSet.Tiles;
+                // CellBase.Cell.tileSet.Tiles.RemoveAt(localCells[i].currentTileIndex);
+                CellBase.NeighborCells[i].Cell.tileSet = new TileSet(CellBase.WaveFunctionManager.backgrounds);
+
+                CellBase.NeighborCells[i].Cell.tileSet.Tiles = _neighbors[i];
                 CellBase.NeighborCells[i].CreateTileStrings(CellBase.NeighborCells[i].Cell.tileSet.Tiles);
+
+                Debug.Log(string.Join(", ", CellBase.NeighborCells[i].Cell.tileSet.Tiles));
             }       
         }
-        
     }
 }

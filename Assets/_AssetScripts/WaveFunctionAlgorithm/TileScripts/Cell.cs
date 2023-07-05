@@ -202,6 +202,7 @@ public class Cell : ICell
 
         if (NorthNeighborExists())
         {
+            // TODO add check to see if already exists
             NeighborCells[0] = grid[Mathf.RoundToInt((Position.x + 0 - indexOffset) + ((Position.y + 1 - indexOffset) * GridManager.DIM))];
 
             if (CellBase.NeighborCells[0].Collapsed)

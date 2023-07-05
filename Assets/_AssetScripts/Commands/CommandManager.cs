@@ -14,7 +14,7 @@ public class CommandManager : MonoBehaviour
         if (TileCommandStack.Count == 0) return;
 
         TileCommand lastCommand = TileCommandStack.Pop();
-        lastCommand.Undo();        
+        (lastCommand as TileCommand).Undo();        
     }
     
     public void UndoTileChunk(int chunkCount)

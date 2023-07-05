@@ -26,10 +26,10 @@ public class CollapseCommand : TileCommand
         if (CellBase.Cell.tileSet.Tiles.Count > 0)
         {
             randomNext = random.Next(0, CellBase.Cell.tileSet.Tiles.Count);
+            // Debug.Log($"randomNext = {randomNext}");
 
-            CellBase.Cell.RollForTile(randomNext);
-
-            GridManager.waveIndex.Add(CellBase);
+            CellBase.Cell.currentTileIndex = randomNext;
+            RollForTile(randomNext);
 
             if (CellBase.sockets.Count == 0)
             { 
@@ -55,8 +55,16 @@ public class CollapseCommand : TileCommand
     }
     public override void Undo()
     {  
-        CellBase.spriteRenderer.sprite = CellBase.initSprite;
         CellBase.Cell.tile = new Tile();
+        CellBase.spriteRenderer.sprite = CellBase.initSprite;
         CellBase.sockets = new List<Socket>();
+    }
+    public void RollForTile(int random)
+    {
+        //Debug.Log($"rolled @ {CellBase.Cell.Index}");
+        CellBase.Cell.tile = CellBase.Cell.tileSet.Tiles[random];
+        CellBase.spriteRenderer.sprite = CellBase.Cell.tile.SPRITE;
+
+        CellBase.sockets = new List<Socket>() { CellBase.Cell.tile.NORTH, CellBase.Cell.tile.EAST, CellBase.Cell.tile.SOUTH, CellBase.Cell.tile.WEST };
     }
 }
